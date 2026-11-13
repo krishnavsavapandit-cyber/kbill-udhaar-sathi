@@ -5,12 +5,15 @@ import { customerSchema, ledgerEntrySchema } from "../src/lib/validations";
 import {
   computeUdhaarScore,
   getCreditDueDate,
+  computeLateDays,
+  DEFAULT_SHOP_TIMEZONE,
   STARTING_SCORE,
   BAND_MULTIPLIERS,
 } from "../src/lib/udhaarScore";
 import {
   calculateProfitSaathiMetrics,
   getPlainLanguageSummary,
+  DEFAULT_TARGET_DAYS_OF_COVER,
   STATIC_FESTIVAL_HINTS,
 } from "../src/lib/profitSaathi";
 
@@ -193,16 +196,37 @@ async function runTests() {
   // ---------------------------------------------------------------------------
   console.log("\n▶ 6. UDHAAR SCORE (DETERMINISTIC & RULE-BASED)");
 
-  // Test 6.1: Due date rule (15th of the month after credit given)
+  // Test 6.1: Due date & Time zone rules (Asia/Kolkata / IST)
+  // Credit given on Jan 10 -> Due Feb 15 at 23:59:59.999 IST (= 18:29:59.999 UTC)
   const janCreditDate = new Date("2026-01-10T10:00:00Z");
   const janDueDate = getCreditDueDate(janCreditDate);
-  const isFeb15 = janDueDate.getFullYear() === 2026 && janDueDate.getMonth() === 1 && janDueDate.getDate() === 15;
-  record("Udhaar Score", "Due date is the 15th of month after credit given (Jan 10 -> Feb 15)", isFeb15);
+  const isFeb15 = janDueDate.toISOString().includes("2026-02-15T18:29:59.999Z");
+  record("Udhaar Score Timezone", "Due date is the 15th of month after credit given (Jan 10 -> Feb 15 in IST)", isFeb15);
 
-  const decCreditDate = new Date("2026-12-05T10:00:00Z");
-  const decDueDate = getCreditDueDate(decCreditDate);
-  const isNextJan15 = decDueDate.getFullYear() === 2027 && decDueDate.getMonth() === 0 && decDueDate.getDate() === 15;
-  record("Udhaar Score", "Due date wraps to next year correctly (Dec 5, 2026 -> Jan 15, 2027)", isNextJan15);
+  // Credit given on last day of month in IST (Jan 31, 2026 23:00 IST = 17:30 UTC)
+  const janLastDayCredit = new Date("2026-01-31T17:30:00.000Z"); // 23:00 IST on Jan 31
+  const janLastDayDue = getCreditDueDate(janLastDayCredit);
+  const isJanLastDayDueFeb15 = janLastDayDue.toISOString().includes("2026-02-15T18:29:59.999Z");
+  record("Udhaar Score Timezone", "Credit given on last day of month (Jan 31 IST) is due Feb 15 IST", isJanLastDayDueFeb15);
+
+  // Credit given in December wrapping into January (Dec 31, 2026 20:00 IST = 14:30 UTC)
+  const dec31Credit = new Date("2026-12-31T14:30:00.000Z"); // Dec 31 in IST
+  const dec31Due = getCreditDueDate(dec31Credit);
+  const isDec31DueJan15NextYear = dec31Due.toISOString().includes("2027-01-15T18:29:59.999Z");
+  record("Udhaar Score Timezone", "Credit in December wraps to Jan 15 of next year in IST (Dec 31, 2026 -> Jan 15, 2027)", isDec31DueJan15NextYear);
+
+  // Payment at 23:30 IST on the 15th counts as ON TIME (0 days late)
+  // Due date is 23:59:59.999 IST on Feb 15 (= 18:29:59.999 UTC)
+  // Payment at 23:30:00 IST on Feb 15 (= 18:00:00.000 UTC)
+  const pay2330IST = new Date("2026-02-15T18:00:00.000Z"); // 23:30 IST Feb 15
+  const onTimeCheck = computeLateDays(pay2330IST, janDueDate);
+  record("Udhaar Score Timezone", "Payment at 23:30 IST on the 15th counts as ON TIME (0 days late)", !onTimeCheck.isLate && onTimeCheck.daysLate === 0);
+
+  // Payment at 00:30 IST on the 16th counts as 1 DAY LATE
+  // Payment at 00:30:00 IST on Feb 16 (= 19:00:00.000 UTC on Feb 15)
+  const pay0030IST = new Date("2026-02-15T19:00:00.000Z"); // 00:30 IST Feb 16
+  const lateCheck = computeLateDays(pay0030IST, janDueDate);
+  record("Udhaar Score Timezone", "Payment at 00:30 IST on the 16th counts as 1 DAY LATE in IST", lateCheck.isLate && lateCheck.daysLate === 1);
 
   // Test 6.2: Exact Score: All on-time (Expected Score = 100, Band = Good)
   const entriesAllOnTime = [
@@ -401,37 +425,37 @@ async function runTests() {
       id: "it_a",
       name: "Item A (Stable)",
       costPaise: 8000,   // ₹80 cost
-      pricePaise: 10000, // ₹100 price (20.0% margin)
+      pricePaise: 10000, // ₹100 price (20.0% margin, ₹20 margin)
       quantity: 15,
       sales: Array.from({ length: 30 }, (_, i) => {
         const d = new Date(mockRefDate);
         d.setDate(d.getDate() - i);
         return { quantity: 1, createdAt: d };
-      }), // 30 units sold in 30 days = 1.0 unit/day
+      }), // 30 units sold in 30 days = 1.0 unit/day -> ₹20/day profit
     },
     {
       id: "it_b",
       name: "Item B (Fast Mover)",
       costPaise: 5000,  // ₹50 cost
-      pricePaise: 6000,  // ₹60 price (16.7% margin)
+      pricePaise: 6500,  // ₹65 price (23.1% margin, ₹15 margin)
       quantity: 4,
       sales: Array.from({ length: 30 }, (_, i) => {
         const d = new Date(mockRefDate);
         d.setDate(d.getDate() - i);
         return { quantity: 2, createdAt: d };
-      }), // 60 units sold in 30 days = 2.0 units/day
+      }), // 60 units sold in 30 days = 2.0 units/day -> ₹30/day profit
     },
     {
       id: "it_c",
       name: "Item C (Dead Stock)",
       costPaise: 20000, // ₹200 cost
-      pricePaise: 30000, // ₹300 price (33.3% margin - highest margin)
+      pricePaise: 30000, // ₹300 price (33.3% margin - highest percentage margin)
       quantity: 8,
-      sales: [], // 0 sales in 30 days -> Dead Stock
+      sales: [], // 0 sales in 30 days -> Dead Stock -> ₹0/day profit
     },
   ];
 
-  const profitReport = calculateProfitSaathiMetrics(testItems, mockRefDate);
+  const profitReport = calculateProfitSaathiMetrics(testItems, 14, mockRefDate);
 
   // 7.1 Average daily sales over last 30 days
   const itemA = profitReport.items.find((it) => it.itemId === "it_a")!;
@@ -447,45 +471,111 @@ async function runTests() {
   record("Profit Saathi", `Days of stock left: Item B (4 units / 2.0) has exact 2.0 days (low stock) [Got: ${itemB.daysOfStockLeft}]`, itemB.daysOfStockLeft === 2.0);
   record("Profit Saathi", `Days of stock left: Item C with 0 sales has null daysOfStockLeft [Got: ${itemC.daysOfStockLeft}]`, itemC.daysOfStockLeft === null);
 
-  // 7.3 Suggested reorder quantity (Target: 14 days buffer)
+  // 7.3 Suggested reorder quantity (Named constant: 14 days default cover vs 21 days cover)
   // Item A: Target = ceil(1.0 * 14) = 14. Current = 15. Reorder = max(0, 14 - 15) = 0.
   // Item B: Target = ceil(2.0 * 14) = 28. Current = 4. Reorder = max(0, 28 - 4) = 24.
-  record("Profit Saathi", `Suggested reorder quantity: Item A needs 0 reorder [Got: ${itemA.suggestedReorderQuantity}]`, itemA.suggestedReorderQuantity === 0);
-  record("Profit Saathi", `Suggested reorder quantity: Item B needs exact 24 units reorder [Got: ${itemB.suggestedReorderQuantity}]`, itemB.suggestedReorderQuantity === 24);
+  record("Profit Saathi", `Suggested reorder quantity (14d cover): Item A needs 0 reorder [Got: ${itemA.suggestedReorderQuantity}]`, itemA.suggestedReorderQuantity === 0);
+  record("Profit Saathi", `Suggested reorder quantity (14d cover): Item B needs exact 24 units reorder [Got: ${itemB.suggestedReorderQuantity}]`, itemB.suggestedReorderQuantity === 24);
+
+  // Reorder rule: test that changing target days of cover from 14 to 21 changes suggested quantity
+  const reportCover21 = calculateProfitSaathiMetrics(testItems, 21, mockRefDate);
+  const itemBCover21 = reportCover21.items.find((it) => it.itemId === "it_b")!;
+  // Item B with 21 days: Target = ceil(2.0 * 21) = 42. Current = 4. Reorder = max(0, 42 - 4) = 38.
+  record(
+    "Profit Saathi",
+    `Changing days of cover from 14 to 21 changes suggested quantity (24 -> 38 units) [Got: ${itemBCover21.suggestedReorderQuantity}]`,
+    itemBCover21.suggestedReorderQuantity === 38
+  );
 
   // 7.4 Dead stock: no sales in 30 days while stock is sitting
   record("Profit Saathi", `Dead stock detection: Item C (0 sales, 8 in stock) is dead stock [Got: ${itemC.isDeadStock}]`, itemC.isDeadStock === true);
   record("Profit Saathi", `Dead stock detection: Item A is NOT dead stock [Got: ${itemA.isDeadStock}]`, itemA.isDeadStock === false);
 
-  // 7.5 Margin ranking: highest percentage margin to lowest
-  record("Profit Saathi", `Margin ranking: Item C (33.3%) is Rank #1 [Got: #${itemC.marginRank}]`, itemC.marginRank === 1);
-  record("Profit Saathi", `Margin ranking: Item A (20.0%) is Rank #2 [Got: #${itemA.marginRank}]`, itemA.marginRank === 2);
-  record("Profit Saathi", `Margin ranking: Item B (16.7%) is Rank #3 [Got: #${itemB.marginRank}]`, itemB.marginRank === 3);
+  // 7.5 Margin & Profit Ranking: Ranked by profit per day (margin * avg daily sales), NOT dead stock #1
+  // Item B: margin 23.1%, sales 2.0/day -> ₹30.00/day profit (3000 paise) -> Rank #1
+  // Item A: margin 20.0%, sales 1.0/day -> ₹20.00/day profit (2000 paise) -> Rank #2
+  // Item C: margin 33.3%, sales 0.0/day -> ₹0.00/day profit (0 paise) -> Rank #3
+  record("Profit Saathi", `Profit per day: Item B generates exact ₹30.00/day (3000 paise) [Got: ${itemB.profitPerDayPaise}]`, itemB.profitPerDayPaise === 3000);
+  record("Profit Saathi", `Profit per day: Item A generates exact ₹20.00/day (2000 paise) [Got: ${itemA.profitPerDayPaise}]`, itemA.profitPerDayPaise === 2000);
+  record("Profit Saathi", `Profit per day: Item C (dead stock) generates exact ₹0.00/day [Got: ${itemC.profitPerDayPaise}]`, itemC.profitPerDayPaise === 0);
 
-  // 7.6 Stock Non-Negative Rule (Database verification)
-  const stockTestItem = await prisma.item.create({
+  record("Profit Saathi", `Profit ranking: Item B (highest profit/day) is Rank #1 [Got: #${itemB.marginRank}]`, itemB.marginRank === 1);
+  record("Profit Saathi", `Profit ranking: Item A is Rank #2 [Got: #${itemA.marginRank}]`, itemA.marginRank === 2);
+  record("Profit Saathi", `Profit ranking: Item C (dead stock) is stopped from being #1, ranked #3 [Got: #${itemC.marginRank}]`, itemC.marginRank === 3);
+
+  // 7.6 Stock Concurrency & Atomic Conditional Update Test
+  // 10 parallel sales for the last 3 units: exactly 3 succeed, 7 are rejected, final stock is 0
+  const concItem = await prisma.item.create({
     data: {
       shopId: shop.id,
-      name: "Stock Non-Negative Test Product",
+      name: "Concurrency Test Product",
       costPaise: 4000,
       pricePaise: 5000,
-      quantity: 4, // 4 units in stock
+      quantity: 3, // exactly 3 units in stock
     },
   });
 
-  // Attempting to sell 5 units must be rejected (cannot go negative)
-  const excessSaleAttempt = stockTestItem.quantity < 5;
-  record("Stock Rule", "Sale exceeding available stock is rejected before deduction (Never negative)", excessSaleAttempt === true);
+  const parallelSales = await Promise.allSettled(
+    Array.from({ length: 10 }, (_, i) =>
+      prisma.$transaction(
+        async (tx) => {
+          // Single conditional update: stock >= qty
+          const updateResult = await tx.item.updateMany({
+            where: {
+              id: concItem.id,
+              shopId: shop.id,
+              quantity: { gte: 1 },
+            },
+            data: {
+              quantity: { decrement: 1 },
+            },
+          });
 
-  // Selling 3 units succeeds and reduces stock from 4 to 1
-  const updatedStockItem = await prisma.item.update({
-    where: { id: stockTestItem.id },
-    data: { quantity: stockTestItem.quantity - 3 },
+          if (updateResult.count === 0) {
+            throw new Error("Insufficient stock. Stock depleted by parallel sale");
+          }
+
+          const sale = await tx.sale.create({
+            data: {
+              shopId: shop.id,
+              itemId: concItem.id,
+              quantity: 1,
+              unitPricePaise: concItem.pricePaise,
+              totalPaise: concItem.pricePaise,
+            },
+          });
+          return { success: true, saleId: sale.id, attempt: i + 1 };
+        },
+        { timeout: 30000, maxWait: 30000 }
+      )
+    )
+  );
+
+  console.log("\n  [RAW CONCURRENCY OUTPUT - 10 PARALLEL SALES FOR 3 UNITS]:");
+  const rawConcurrencyLogs = parallelSales.map((r, i) => {
+    if (r.status === "fulfilled") {
+      const log = `Attempt #${i + 1}: SUCCESS (Sale recorded: ${r.value.saleId})`;
+      console.log(`    ${log}`);
+      return log;
+    } else {
+      const log = `Attempt #${i + 1}: REJECTED (Error: ${(r.reason as Error).message})`;
+      console.log(`    ${log}`);
+      return log;
+    }
   });
-  record("Stock Rule", `Sale reduces stock atomically (4 -> 1 unit remaining) [Got: ${updatedStockItem.quantity}]`, updatedStockItem.quantity === 1);
 
-  // Clean up stock test item
-  await prisma.item.delete({ where: { id: stockTestItem.id } });
+  const successfulSalesCount = parallelSales.filter((r) => r.status === "fulfilled").length;
+  const rejectedSalesCount = parallelSales.filter((r) => r.status === "rejected").length;
+  const finalConcItem = await prisma.item.findUnique({ where: { id: concItem.id } });
+  const finalStock = finalConcItem?.quantity;
+
+  record("Stock Concurrency", "Exactly 3 out of 10 parallel sales succeed", successfulSalesCount === 3, `Succeeded: ${successfulSalesCount}`);
+  record("Stock Concurrency", "Exactly 7 out of 10 parallel sales are rejected with clear error", rejectedSalesCount === 7, `Rejected: ${rejectedSalesCount}`);
+  record("Stock Concurrency", `Final stock is exactly 0 and never goes negative [Got: ${finalStock}]`, finalStock === 0);
+
+  // Clean up concurrency test items
+  await prisma.sale.deleteMany({ where: { itemId: concItem.id } });
+  await prisma.item.delete({ where: { id: concItem.id } });
 
   // 7.7 Missing AI key test: returns null without error, report numbers intact
   const oldApiKey = process.env.GEMINI_API_KEY;
@@ -493,6 +583,7 @@ async function runTests() {
   const missingKeySummary = await getPlainLanguageSummary(profitReport, "en");
   record("AI Guardrails", "Missing Gemini API key returns null gracefully without throwing", missingKeySummary === null);
   record("AI Guardrails", "Calculated report numbers remain completely intact when AI key is missing", profitReport.items.length === 3 && profitReport.totalDeadStockItemsCount === 1);
+  if (oldApiKey) process.env.GEMINI_API_KEY = oldApiKey;
   if (oldApiKey) process.env.GEMINI_API_KEY = oldApiKey;
 
   // ---------------------------------------------------------------------------
@@ -542,6 +633,7 @@ async function runTests() {
     { action: "reverseLedgerEntry", payload: { entryId: "test" } },
     { action: "getCustomerScore", payload: { customerId: "test" } },
     { action: "updateShopBaseLimit", payload: { baseLimitRupees: 6000 } },
+    { action: "updateShopReorderDays", payload: { targetDays: 21 } },
     { action: "createItem", payload: { name: "Tea", costRupees: 200, priceRupees: 250, quantity: 10 } },
     { action: "recordSale", payload: { itemId: "test", quantity: 1 } },
     { action: "getProfitSaathiReport", payload: { lang: "en" } },

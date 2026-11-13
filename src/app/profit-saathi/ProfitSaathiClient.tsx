@@ -11,12 +11,13 @@ import {
   ShoppingBag,
   X,
   Calendar,
+  SlidersHorizontal,
 } from "lucide-react";
 import { formatINR } from "@/lib/money";
 import { Navbar } from "@/components/Navbar";
 import { BottomNav } from "@/components/BottomNav";
 import { ItemProfitAnalysis, ProfitSaathiReport } from "@/lib/profitSaathi";
-import { createItem, recordSale } from "@/app/actions";
+import { createItem, recordSale, updateShopReorderDays } from "@/app/actions";
 
 interface ProfitSaathiClientProps {
   report: ProfitSaathiReport;
@@ -45,6 +46,32 @@ export function ProfitSaathiClient({
   const [saleItem, setSaleItem] = useState<ItemProfitAnalysis | null>(null);
   const [saleQuantity, setSaleQuantity] = useState("1");
   const [saleError, setSaleError] = useState<string | null>(null);
+
+  // Settings Modal State (Target Days of Cover)
+  const [showSettings, setShowSettings] = useState(false);
+  const [targetDaysInput, setTargetDaysInput] = useState(
+    (report.targetDaysOfCover || 14).toString()
+  );
+  const [settingsError, setSettingsError] = useState<string | null>(null);
+
+  const handleUpdateCoverDays = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSettingsError(null);
+    const days = parseInt(targetDaysInput, 10);
+    if (isNaN(days) || days < 1 || days > 365) {
+      setSettingsError("Please enter valid days between 1 and 365");
+      return;
+    }
+    startTransition(async () => {
+      const res = await updateShopReorderDays(days);
+      if (res.success) {
+        setShowSettings(false);
+        router.refresh();
+      } else {
+        setSettingsError(res.error || "Failed to update target cover days");
+      }
+    });
+  };
 
   const handleCreateItem = (e: React.FormEvent) => {
     e.preventDefault();
@@ -214,11 +241,15 @@ export function ProfitSaathiClient({
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
               <Package className="w-4 h-4 text-emerald-700" />
-              <span>Item Velocity & Margins</span>
+              <span>Item Velocity & Profit Ranking</span>
             </h2>
-            <span className="text-xs font-bold text-slate-400">
-              {report.items.length} products
-            </span>
+            <button
+              onClick={() => setShowSettings(true)}
+              className="text-[11px] font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-xl flex items-center gap-1 transition-colors"
+            >
+              <SlidersHorizontal className="w-3 h-3 text-slate-500" />
+              <span>Cover: {report.targetDaysOfCover}d</span>
+            </button>
           </div>
 
           {report.items.length === 0 ? (
@@ -256,10 +287,19 @@ export function ProfitSaathiClient({
                         )}
                       </div>
                       <div className="text-xs text-slate-500 mt-0.5">
-                        Cost: {formatINR(item.costPaise)} • Price: {formatINR(item.pricePaise)} • Margin:{" "}
-                        <strong className="text-emerald-700 font-bold">
-                          {item.marginPercentage}% ({formatINR(item.marginPaise)})
-                        </strong>
+                        Cost: {formatINR(item.costPaise)} • Price: {formatINR(item.pricePaise)}
+                      </div>
+                      {/* Margin %, Daily Sales, and Profit per day side by side */}
+                      <div className="flex items-center gap-1.5 flex-wrap text-[11px] mt-1.5">
+                        <span className="bg-emerald-50 text-emerald-800 font-bold px-2 py-0.5 rounded-lg border border-emerald-200">
+                          Margin: {item.marginPercentage}%
+                        </span>
+                        <span className="bg-blue-50 text-blue-800 font-bold px-2 py-0.5 rounded-lg border border-blue-200">
+                          Sales: {item.avgDailySales}/day
+                        </span>
+                        <span className="bg-purple-50 text-purple-800 font-bold px-2 py-0.5 rounded-lg border border-purple-200">
+                          Profit: {formatINR(item.profitPerDayPaise)}/day
+                        </span>
                       </div>
                     </div>
 
@@ -314,7 +354,7 @@ export function ProfitSaathiClient({
 
                     <div className="bg-white p-2 rounded-xl border border-slate-100">
                       <div className="text-[10px] text-slate-400 font-bold uppercase">
-                        Reorder
+                        Reorder ({report.targetDaysOfCover}d)
                       </div>
                       <div className="text-xs font-black text-emerald-700 mt-0.5">
                         +{item.suggestedReorderQuantity}
@@ -533,6 +573,75 @@ export function ProfitSaathiClient({
                   className="flex-1 py-2.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold shadow-md"
                 >
                   {isPending ? "Recording..." : "Confirm Sale"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Reorder Cover Days Settings Modal */}
+      {showSettings && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-5 max-w-sm w-full shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 font-bold">
+                  <SlidersHorizontal className="w-4 h-4" />
+                </div>
+                <h3 className="text-base font-black text-slate-900">
+                  Target Days of Cover
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowSettings(false)}
+                className="p-1 rounded-full text-slate-400 hover:bg-slate-100"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Set how many days of inventory buffer you wish to maintain when calculating the suggested reorder quantity.
+            </p>
+
+            <form onSubmit={handleUpdateCoverDays} className="space-y-3">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                  Buffer Days (Default: 14)
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="365"
+                  value={targetDaysInput}
+                  onChange={(e) => setTargetDaysInput(e.target.value)}
+                  required
+                  autoFocus
+                  className="w-full px-3.5 py-3 rounded-xl border border-slate-300 text-lg font-black focus:outline-none focus:border-emerald-600"
+                />
+              </div>
+
+              {settingsError && (
+                <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold">
+                  {settingsError}
+                </div>
+              )}
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowSettings(false)}
+                  className="flex-1 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isPending}
+                  className="flex-1 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-md"
+                >
+                  {isPending ? "Saving..." : "Save Setting"}
                 </button>
               </div>
             </form>

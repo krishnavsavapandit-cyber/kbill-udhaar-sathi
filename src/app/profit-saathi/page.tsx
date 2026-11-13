@@ -17,6 +17,7 @@ export default async function ProfitSaathiPage() {
     totalDeadStockItemsCount: 0,
     topMarginItemName: null,
     lowStockItemsCount: 0,
+    targetDaysOfCover: shop.reorderDaysOfCover ?? 14,
     festivalHints: [],
     aiSummary: null,
   };

@@ -10,6 +10,7 @@ import {
   reverseLedgerEntry,
   getCustomerScore,
   updateShopBaseLimit,
+  updateShopReorderDays,
   createItem,
   recordSale,
   getProfitSaathiReport,
@@ -81,6 +82,11 @@ export async function POST(req: NextRequest) {
 
       case "updateShopBaseLimit": {
         const res = await updateShopBaseLimit(payload?.baseLimitRupees);
+        return NextResponse.json(res, { status: res.success ? 200 : 400 });
+      }
+
+      case "updateShopReorderDays": {
+        const res = await updateShopReorderDays(payload?.targetDays);
         return NextResponse.json(res, { status: res.success ? 200 : 400 });
       }
 

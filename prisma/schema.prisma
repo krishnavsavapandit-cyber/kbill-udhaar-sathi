@@ -17,6 +17,7 @@ model Shop {
   phone                String?
   isDemo               Boolean       @default(false)
   baseCreditLimitPaise Int           @default(500000) // Default ₹5,000 base credit limit
+  reorderDaysOfCover   Int           @default(14)     // Target days of stock cover (default 14 days)
   createdAt            DateTime      @default(now())
   updatedAt            DateTime      @updatedAt
   customers            Customer[]

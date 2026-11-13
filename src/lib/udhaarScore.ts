@@ -41,6 +41,39 @@ export const BAND_MULTIPLIERS: Record<ScoreBand, number> = {
   Risky: 0.2,  // 20% of base limit
 };
 
+export const DEFAULT_SHOP_TIMEZONE = "Asia/Kolkata";
+
+/**
+ * Returns year, month (0-indexed), day, hours, minutes, seconds in the given timeZone.
+ */
+export function getZonedDateParts(date: Date, timeZone: string = DEFAULT_SHOP_TIMEZONE) {
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
+    hour12: false,
+  });
+  const parts = formatter.formatToParts(date);
+  const partMap: Record<string, number> = {};
+  for (const p of parts) {
+    if (p.type !== "literal") {
+      partMap[p.type] = parseInt(p.value, 10);
+    }
+  }
+  return {
+    year: partMap.year,
+    month: partMap.month - 1, // 0-indexed month
+    day: partMap.day,
+    hour: partMap.hour === 24 ? 0 : partMap.hour,
+    minute: partMap.minute,
+    second: partMap.second,
+  };
+}
+
 export interface SettlementDetail {
   creditId: string;
   paymentId: string;
@@ -77,13 +110,40 @@ export interface UdhaarScoreResult {
 /**
  * 1. Due Date Rule:
  * "each credit entry is due on the 15th of the month after it was given."
+ * Computed in the shop's timezone (default Asia/Kolkata).
+ * Due date is the end of the 15th of next month: 23:59:59.999 IST.
  */
-export function getCreditDueDate(givenDate: Date): Date {
-  const d = new Date(givenDate);
-  const year = d.getFullYear();
-  const month = d.getMonth();
-  // 15th of next month, 23:59:59.999
-  return new Date(year, month + 1, 15, 23, 59, 59, 999);
+export function getCreditDueDate(givenDate: Date, timeZone: string = DEFAULT_SHOP_TIMEZONE): Date {
+  const parts = getZonedDateParts(givenDate, timeZone);
+  let dueYear = parts.year;
+  let dueMonth = parts.month + 1; // 15th of next month
+  if (dueMonth > 11) {
+    dueYear += 1;
+    dueMonth = 0;
+  }
+  // Fixed offset for Asia/Kolkata is +05:30 (+19,800,000 ms)
+  const istOffsetMs = 5.5 * 60 * 60 * 1000;
+  const utcInstant = Date.UTC(dueYear, dueMonth, 15, 23, 59, 59, 999) - istOffsetMs;
+  return new Date(utcInstant);
+}
+
+/**
+ * Computes whether a payment or reference date is late and how many days late in the shop's timezone.
+ */
+export function computeLateDays(
+  paidOrRefDate: Date,
+  dueDate: Date,
+  timeZone: string = DEFAULT_SHOP_TIMEZONE
+): { isLate: boolean; daysLate: number } {
+  if (paidOrRefDate.getTime() <= dueDate.getTime()) {
+    return { isLate: false, daysLate: 0 };
+  }
+  const paidParts = getZonedDateParts(paidOrRefDate, timeZone);
+  const dueParts = getZonedDateParts(dueDate, timeZone);
+  const paidDayUtc = Date.UTC(paidParts.year, paidParts.month, paidParts.day);
+  const dueDayUtc = Date.UTC(dueParts.year, dueParts.month, dueParts.day);
+  const calendarDaysDiff = Math.max(1, Math.round((paidDayUtc - dueDayUtc) / (24 * 60 * 60 * 1000)));
+  return { isLate: true, daysLate: calendarDaysDiff };
 }
 
 /**
@@ -101,7 +161,8 @@ export function computeUdhaarScore(
     createdAt: Date | string;
   }>,
   shopBaseLimitPaise: number = 500000, // default ₹5,000 base
-  referenceDate: Date = new Date()
+  referenceDate: Date = new Date(),
+  timeZone: string = DEFAULT_SHOP_TIMEZONE
 ): UdhaarScoreResult {
   // Separate into chronological credits and payments
   const rawCredits = entries
@@ -110,7 +171,7 @@ export function computeUdhaarScore(
       id: e.id,
       amountPaise: e.amountPaise,
       createdAt: new Date(e.createdAt),
-      dueDate: getCreditDueDate(new Date(e.createdAt)),
+      dueDate: getCreditDueDate(new Date(e.createdAt), timeZone),
       unpaidPaise: e.amountPaise,
       settlements: [] as SettlementDetail[],
     }))
@@ -133,13 +194,7 @@ export function computeUdhaarScore(
       if (credit.unpaidPaise <= 0) continue;
 
       const allocatedPaise = Math.min(payment.availablePaise, credit.unpaidPaise);
-      const isLate = payment.paidAt.getTime() > credit.dueDate.getTime();
-      let daysLate = 0;
-      if (isLate) {
-        daysLate = Math.ceil(
-          (payment.paidAt.getTime() - credit.dueDate.getTime()) / (1000 * 60 * 60 * 24)
-        );
-      }
+      const { isLate, daysLate } = computeLateDays(payment.paidAt, credit.dueDate, timeZone);
 
       credit.settlements.push({
         creditId: credit.id,
@@ -196,7 +251,7 @@ export function computeUdhaarScore(
         const share = st.amountPaise / totalCreditGivenPaise;
         const penalty = Math.round(share * st.daysLate * LATE_DAY_WEIGHT);
         calculatedScore -= penalty;
-        const month = credit.createdAt.toLocaleString("en-US", { month: "short" });
+        const month = credit.createdAt.toLocaleString("en-US", { month: "short", timeZone });
         reasons.push(`₹${(st.amountPaise / 100).toFixed(0)} from ${month} was paid ${st.daysLate} days late (-${penalty} pts)`);
       } else {
         onTimePaymentsCount++;
@@ -208,18 +263,18 @@ export function computeUdhaarScore(
   // Process currently unpaid / overdue credits
   const creditsStatus: CreditStatus[] = [];
   for (const credit of rawCredits) {
-    const isOverdue = credit.unpaidPaise > 0 && referenceDate.getTime() > credit.dueDate.getTime();
-    let daysOverdue = 0;
+    const { isLate: isOverdue, daysLate: daysOverdue } =
+      credit.unpaidPaise > 0
+        ? computeLateDays(referenceDate, credit.dueDate, timeZone)
+        : { isLate: false, daysLate: 0 };
+
     if (isOverdue) {
-      daysOverdue = Math.ceil(
-        (referenceDate.getTime() - credit.dueDate.getTime()) / (1000 * 60 * 60 * 24)
-      );
       const share = credit.unpaidPaise / totalCreditGivenPaise;
       const penalty = Math.round(
         UNPAID_OVERDUE_FLAT_PENALTY + share * daysOverdue * UNPAID_OVERDUE_DAY_WEIGHT
       );
       calculatedScore -= penalty;
-      const month = credit.createdAt.toLocaleString("en-US", { month: "short" });
+      const month = credit.createdAt.toLocaleString("en-US", { month: "short", timeZone });
       reasons.push(`₹${(credit.unpaidPaise / 100).toFixed(0)} from ${month}, ${daysOverdue} days overdue (-${penalty} pts)`);
     }
 

@@ -7,7 +7,7 @@
  */
 
 export const ANALYSIS_WINDOW_DAYS = 30;
-export const TARGET_REORDER_BUFFER_DAYS = 14;
+export const DEFAULT_TARGET_DAYS_OF_COVER = 14;
 
 export interface ItemProfitAnalysis {
   itemId: string;
@@ -23,7 +23,8 @@ export interface ItemProfitAnalysis {
   isDeadStock: boolean;
   marginPaise: number;
   marginPercentage: number;
-  marginRank: number;
+  profitPerDayPaise: number; // marginPaise * avgDailySales
+  marginRank: number; // Ranked by daily profit (margin * avg daily sales)
 }
 
 export interface ProfitSaathiReport {
@@ -33,6 +34,7 @@ export interface ProfitSaathiReport {
   totalDeadStockItemsCount: number;
   topMarginItemName: string | null;
   lowStockItemsCount: number;
+  targetDaysOfCover: number;
   festivalHints: Array<{ title: string; hint: string }>;
   aiSummary: string | null;
 }
@@ -71,6 +73,7 @@ export function calculateProfitSaathiMetrics(
       createdAt: Date | string;
     }>;
   }>,
+  targetDaysOfCover: number = DEFAULT_TARGET_DAYS_OF_COVER,
   referenceDate: Date = new Date()
 ): ProfitSaathiReport {
   const windowStart = new Date(referenceDate);
@@ -104,10 +107,10 @@ export function calculateProfitSaathiMetrics(
       }
     }
 
-    // Suggested reorder quantity: target stock for 14 days buffer minus current quantity
+    // Suggested reorder quantity: target stock for targetDaysOfCover buffer minus current quantity
     let suggestedReorderQuantity = 0;
     if (avgDailySales > 0) {
-      const targetStock = Math.ceil(avgDailySales * TARGET_REORDER_BUFFER_DAYS);
+      const targetStock = Math.ceil(avgDailySales * targetDaysOfCover);
       suggestedReorderQuantity = Math.max(0, targetStock - item.quantity);
     }
 
@@ -124,6 +127,9 @@ export function calculateProfitSaathiMetrics(
       marginPercentage = Math.round(((item.pricePaise - item.costPaise) / item.pricePaise) * 1000) / 10;
     }
 
+    // Profit per day: marginPaise * avgDailySales (integer paise per day)
+    const profitPerDayPaise = Math.round(marginPaise * avgDailySales);
+
     return {
       itemId: item.id,
       name: item.name,
@@ -138,17 +144,31 @@ export function calculateProfitSaathiMetrics(
       isDeadStock,
       marginPaise,
       marginPercentage,
+      profitPerDayPaise,
       marginRank: 0, // Assigned below
     };
   });
 
-  // Sort and assign margin ranks (descending by margin percentage)
-  analyzedItems.sort((a, b) => b.marginPercentage - a.marginPercentage);
+  // Sort and assign ranks: Rank by profit per day (margin * avg daily sales) descending.
+  // Dead stock has 0 daily sales, so 0 profit per day and will never be ranked #1.
+  // Tie-breaker: margin percentage descending, then name ascending.
+  analyzedItems.sort((a, b) => {
+    if (b.profitPerDayPaise !== a.profitPerDayPaise) {
+      return b.profitPerDayPaise - a.profitPerDayPaise;
+    }
+    if (b.marginPercentage !== a.marginPercentage) {
+      return b.marginPercentage - a.marginPercentage;
+    }
+    return a.name.localeCompare(b.name);
+  });
   analyzedItems.forEach((it, idx) => {
     it.marginRank = idx + 1;
   });
 
-  const topMarginItemName = analyzedItems.length > 0 ? analyzedItems[0].name : null;
+  const topMarginItemName =
+    analyzedItems.length > 0 && analyzedItems[0].profitPerDayPaise > 0
+      ? analyzedItems[0].name
+      : null;
 
   return {
     items: analyzedItems,
@@ -157,6 +177,7 @@ export function calculateProfitSaathiMetrics(
     totalDeadStockItemsCount,
     topMarginItemName,
     lowStockItemsCount,
+    targetDaysOfCover,
     festivalHints: STATIC_FESTIVAL_HINTS,
     aiSummary: null, // Populated via optional Gemini helper
   };

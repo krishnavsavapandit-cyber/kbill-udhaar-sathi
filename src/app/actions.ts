@@ -610,7 +610,6 @@ export async function recordSale(data: {
       return { success: false, error: "Item not found" };
     }
 
-    // Rule: "sales that reduce stock and never go negative"
     if (item.quantity < data.quantity) {
       return {
         success: false,
@@ -618,32 +617,75 @@ export async function recordSale(data: {
       };
     }
 
-    // Record sale and atomically decrement stock
-    await prisma.$transaction([
-      prisma.sale.create({
-        data: {
-          shopId: shop.id,
-          itemId: item.id,
-          quantity: data.quantity,
-          unitPricePaise: item.pricePaise,
-          totalPaise: item.pricePaise * data.quantity,
-        },
-      }),
-      prisma.item.update({
-        where: { id: item.id },
-        data: {
-          quantity: item.quantity - data.quantity,
-        },
-      }),
-    ]);
+    // Atomic conditional stock reduction inside a transaction to prevent negative stock under concurrency
+    const result = await prisma.$transaction(
+      async (tx) => {
+        // Single conditional update: stock must be >= requested quantity
+        const updateResult = await tx.item.updateMany({
+          where: {
+            id: item.id,
+            shopId: shop.id,
+            quantity: { gte: data.quantity },
+          },
+          data: {
+            quantity: { decrement: data.quantity },
+          },
+        });
+
+        if (updateResult.count === 0) {
+          throw new Error(
+            `Insufficient stock. Parallel sale depleted stock before request could complete`
+          );
+        }
+
+        await tx.sale.create({
+          data: {
+            shopId: shop.id,
+            itemId: item.id,
+            quantity: data.quantity,
+            unitPricePaise: item.pricePaise,
+            totalPaise: item.pricePaise * data.quantity,
+          },
+        });
+
+        return { success: true };
+      },
+      { timeout: 30000, maxWait: 30000 }
+    );
 
     revalidatePath("/profit-saathi");
-    return { success: true };
+    return result;
   } catch (err: unknown) {
     if (err instanceof UnauthorizedError) {
       return { success: false, error: "UNAUTHORIZED" };
     }
     const message = err instanceof Error ? err.message : "Failed to record sale";
+    return { success: false, error: message };
+  }
+}
+
+export async function updateShopReorderDays(
+  targetDays: number
+): Promise<ActionResult<{ reorderDaysOfCover: number }>> {
+  try {
+    const shop = await requireShop();
+
+    if (!Number.isInteger(targetDays) || targetDays < 1 || targetDays > 365) {
+      return { success: false, error: "Target days of cover must be an integer between 1 and 365 days" };
+    }
+
+    const updated = await prisma.shop.update({
+      where: { id: shop.id },
+      data: { reorderDaysOfCover: targetDays },
+    });
+
+    revalidatePath("/profit-saathi");
+    return { success: true, data: { reorderDaysOfCover: updated.reorderDaysOfCover } };
+  } catch (err: unknown) {
+    if (err instanceof UnauthorizedError) {
+      return { success: false, error: "UNAUTHORIZED" };
+    }
+    const message = err instanceof Error ? err.message : "Failed to update reorder days of cover";
     return { success: false, error: message };
   }
 }
@@ -662,7 +704,7 @@ export async function getProfitSaathiReport(lang: "en" | "hi" = "en"): Promise<A
       orderBy: { name: "asc" },
     });
 
-    const report = calculateProfitSaathiMetrics(items);
+    const report = calculateProfitSaathiMetrics(items, shop.reorderDaysOfCover);
     const aiSummary = await getPlainLanguageSummary(report, lang);
 
     return {
