@@ -43,7 +43,7 @@ export function Navbar({ shopName = "Udhaar Saathi", isDemo = false }: NavbarPro
       {isDemo && (
         <div className="bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-amber-950 px-3 py-1.5 text-xs font-black text-center tracking-wider uppercase flex items-center justify-center gap-2 shadow-inner border-b border-amber-500/40">
           <span className="inline-block w-2.5 h-2.5 rounded-full bg-amber-800 animate-pulse"></span>
-          <span className="tracking-wide">{t.demoDataBadge} (Demonstration Kirana Data)</span>
+          <span className="tracking-wide">{t.demoDataBadge}</span>
         </div>
       )}
 
@@ -59,7 +59,7 @@ export function Navbar({ shopName = "Udhaar Saathi", isDemo = false }: NavbarPro
                 {t.appName}
               </h1>
               <span className="hidden sm:inline-block px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-amber-400 text-amber-950 uppercase tracking-wider">
-                किराना
+                {t.kiranaBadge}
               </span>
             </div>
             <p className="text-[11px] sm:text-xs font-semibold text-emerald-200 flex items-center gap-1 truncate max-w-[140px] sm:max-w-[220px] mt-0.5">

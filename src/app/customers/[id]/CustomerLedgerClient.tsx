@@ -266,7 +266,7 @@ export function CustomerLedgerClient({
             className="p-2 -ml-2 rounded-2xl text-slate-700 hover:text-emerald-800 hover:bg-amber-100/60 flex items-center gap-1.5 text-xs sm:text-sm font-black transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>{t.customers} (ग्राहक सूची)</span>
+            <span>{t.customersBreadcrumb}</span>
           </Link>
 
           <button
@@ -378,7 +378,7 @@ export function CustomerLedgerClient({
                     <div>
                       <div className="flex items-center gap-2">
                         <h3 className="text-sm font-black text-slate-900 tracking-tight">
-                          Udhaar Score (उधार साख)
+                          {t.udhaarScoreTitle}
                         </h3>
                         <span
                           className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
@@ -393,12 +393,12 @@ export function CustomerLedgerClient({
                         </span>
                       </div>
                       <p className="text-xs text-slate-500 font-semibold mt-0.5">
-                        Suggested Limit:{" "}
+                        {t.suggestedLimit}:{" "}
                         <strong className="text-slate-900 font-black">
                           {formatINR(customer.scoreResult.suggestedLimitPaise)}
                         </strong>{" "}
                         <span className="text-[10px] text-slate-400 font-bold">
-                          (Advisory)
+                          ({t.advisoryNote})
                         </span>
                       </p>
                     </div>
@@ -409,7 +409,7 @@ export function CustomerLedgerClient({
                 {customer.scoreResult.reasons.length > 0 && (
                   <div className="space-y-1.5 pt-1">
                     <div className="text-[10px] font-black text-slate-400 uppercase tracking-wider">
-                      Payment History & Score Factors
+                      {t.scoreFactorsTitle}
                     </div>
                     <div className="space-y-1">
                       {customer.scoreResult.reasons.map((reason, idx) => (
@@ -433,7 +433,7 @@ export function CustomerLedgerClient({
             {/* Desktop / In-Page Big Action Buttons */}
             <div className="bg-white rounded-3xl p-5 shadow-sm border-2 border-amber-900/10 space-y-3">
               <div className="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center justify-between">
-                <span>लेन-देन दर्ज करें (Record Transaction)</span>
+                <span>{t.recordTransaction}</span>
                 <span className="text-[11px] font-bold text-slate-400">Append-Only</span>
               </div>
 
@@ -466,7 +466,7 @@ export function CustomerLedgerClient({
                   <span>{t.entriesHistory}</span>
                 </h2>
                 <span className="text-xs font-black bg-amber-100 text-amber-950 px-2.5 py-0.5 rounded-full border border-amber-300">
-                  {customer.entries.length} entries
+                  {customer.entries.length} {t.entriesCount}
                 </span>
               </div>
 
@@ -475,7 +475,7 @@ export function CustomerLedgerClient({
                   <KhataBookIcon className="w-10 h-10 mx-auto text-slate-300" />
                   <p className="text-sm font-bold text-slate-600">{t.noEntriesYet}</p>
                   <p className="text-xs text-slate-400 max-w-xs mx-auto font-medium">
-                    उधार देने के लिए लाल बटन व भुगतान जमा करने के लिए हरे बटन का उपयोग करें।
+                    {t.recordInstructions}
                   </p>
                 </div>
               ) : (

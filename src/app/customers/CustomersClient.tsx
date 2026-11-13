@@ -151,7 +151,7 @@ export function CustomersClient({
                 </span>
               </h1>
               <p className="text-xs text-slate-500 font-semibold mt-0.5">
-                दुकानदार का डिजिटल खाता रजिस्टर (Shopkeeper Khata Directory)
+                {t.digitalKhataSubtitle}
               </p>
             </div>
 
@@ -197,7 +197,7 @@ export function CustomersClient({
                     : "bg-amber-100/70 hover:bg-amber-200/80 text-amber-950"
                 }`}
               >
-                सभी ({initialCustomers.length})
+                {t.filterAll} ({initialCustomers.length})
               </button>
               <button
                 onClick={() => setFilterType("DUES")}
@@ -207,7 +207,7 @@ export function CustomersClient({
                     : "bg-rose-100 hover:bg-rose-200 text-rose-900"
                 }`}
               >
-                उधार बाकी ({initialCustomers.filter((c) => c.balancePaise > 0).length})
+                {t.filterDues} ({initialCustomers.filter((c) => c.balancePaise > 0).length})
               </button>
               <button
                 onClick={() => setFilterType("SETTLED")}
@@ -217,7 +217,7 @@ export function CustomersClient({
                     : "bg-teal-100 hover:bg-teal-200 text-teal-900"
                 }`}
               >
-                हिसाब चुकता ({initialCustomers.filter((c) => c.balancePaise <= 0).length})
+                {t.filterSettled} ({initialCustomers.filter((c) => c.balancePaise <= 0).length})
               </button>
             </div>
           </div>
@@ -234,7 +234,7 @@ export function CustomersClient({
             </p>
             <p className="text-xs text-slate-500 max-w-sm mx-auto font-medium">
               {search
-                ? `"${search}" के नाम या नंबर से कोई ग्राहक नहीं मिला। कृपया नंबर या वर्तनी जांचें।`
+                ? t.noSearchMatch(search)
                 : t.addFirstCustomer}
             </p>
             {!search && (
@@ -322,7 +322,7 @@ export function CustomersClient({
                         href={`/customers/${customer.id}`}
                         className="px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-950 text-xs font-extrabold flex items-center gap-1 transition-colors"
                       >
-                        <span>खाता</span>
+                        <span>{t.viewLedger}</span>
                         <ChevronRight className="w-3.5 h-3.5" />
                       </Link>
                     </div>
@@ -391,7 +391,7 @@ export function CustomersClient({
                   />
                 </div>
                 <p className="text-[11px] text-slate-400 font-medium mt-1">
-                  10-अंकों का भारतीय मोबाइल नंबर (WhatsApp रिमाइंडर हेतु)
+                  {t.phoneHelperText}
                 </p>
               </div>
 

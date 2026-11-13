@@ -52,7 +52,7 @@ export default function LoginPage() {
               {t.appName}
             </span>
             <span className="block text-[11px] font-bold text-amber-800">
-              डिजिटल बही-खाता
+              {t.tagline}
             </span>
           </div>
         </div>
@@ -126,7 +126,7 @@ export default function LoginPage() {
 
           <div className="mt-6 pt-5 border-t border-amber-900/10 flex items-center justify-center gap-2 text-xs text-slate-500 font-semibold">
             <ShieldCheck className="w-4 h-4 text-emerald-600" />
-            <span>Single-shopkeeper secured ledger (.env)</span>
+            <span>{t.singleShopSecured}</span>
           </div>
         </div>
       </div>

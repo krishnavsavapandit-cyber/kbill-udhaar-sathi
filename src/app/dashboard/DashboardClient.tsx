@@ -106,9 +106,9 @@ export function DashboardClient({ data }: { data: DashboardData }) {
               <div className="flex items-center justify-between text-xs text-emerald-200 font-bold border-b border-emerald-700/60 pb-2">
                 <span className="flex items-center gap-1 text-amber-300">
                   <KhataBookIcon className="w-4 h-4" />
-                  खाता बही सारांश (Shop Summary)
+                  {t.khataSummaryTitle}
                 </span>
-                <span className="text-[11px] text-emerald-300">{data.totalCustomersCount} Total</span>
+                <span className="text-[11px] text-emerald-300">{data.totalCustomersCount} {t.totalCount}</span>
               </div>
 
               <div className="grid grid-cols-2 gap-2 text-center">
@@ -158,7 +158,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
             className="flex items-center justify-center gap-2 py-3.5 px-4 bg-amber-500 hover:bg-amber-600 text-amber-950 rounded-2xl font-extrabold text-sm shadow-sm active:scale-95 transition-all col-span-2 sm:col-span-2 border border-amber-600"
           >
             <ShoppingBag className="w-5 h-5 flex-shrink-0" />
-            <span>Profit Saathi (राशन व मुनाफा)</span>
+            <span>{t.profitSaathiNav}</span>
           </Link>
         </section>
 
@@ -250,7 +250,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
                   <Clock className="w-4 h-4 text-emerald-700" />
                   <span>{t.recentActivity}</span>
                 </h2>
-                <span className="text-[11px] font-bold text-slate-400">Live Feed</span>
+                <span className="text-[11px] font-bold text-slate-400">{t.liveFeed}</span>
               </div>
 
               {data.recentEntries.length === 0 ? (
@@ -308,34 +308,34 @@ export function DashboardClient({ data }: { data: DashboardData }) {
                     <ShoppingBag className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-extrabold text-amber-950">दुकान का राशन व स्टॉक</h3>
-                    <p className="text-[11px] font-semibold text-amber-800">Profit Saathi Inventory</p>
+                    <h3 className="text-sm font-extrabold text-amber-950">{t.rationPantryTitle}</h3>
+                    <p className="text-[11px] font-semibold text-amber-800">{t.rationPantrySubtitle}</p>
                   </div>
                 </div>
                 <Link
                   href="/profit-saathi"
                   className="text-xs font-black text-amber-900 bg-amber-300 hover:bg-amber-400 px-3 py-1.5 rounded-xl shadow-sm transition-colors"
                 >
-                  खोलें →
+                  {t.openButton}
                 </Link>
               </div>
 
               <p className="text-xs text-amber-900/80 font-medium">
-                30-दिनों की बिक्री से स्टॉक के दिन, रिऑर्डर मात्रा व मुनाफ़ा की गणना बिना किसी अनुमान के।
+                {t.rationPantryDesc}
               </p>
 
               <div className="flex items-center justify-between pt-1 text-center bg-white/70 rounded-xl p-2.5 border border-amber-200">
                 <div className="flex-1 border-r border-amber-200">
-                  <div className="text-[10px] font-bold text-slate-500 uppercase">आटा / दाल</div>
-                  <div className="text-xs font-black text-slate-800 mt-0.5">आवश्यक राशन</div>
+                  <div className="text-[10px] font-bold text-slate-500 uppercase">{t.flourGrains}</div>
+                  <div className="text-xs font-black text-slate-800 mt-0.5">{t.essentialRation}</div>
                 </div>
                 <div className="flex-1 border-r border-amber-200">
-                  <div className="text-[10px] font-bold text-slate-500 uppercase">सरसों तेल</div>
-                  <div className="text-xs font-black text-slate-800 mt-0.5">तेज़ बिक्री</div>
+                  <div className="text-[10px] font-bold text-slate-500 uppercase">{t.mustardOil}</div>
+                  <div className="text-xs font-black text-slate-800 mt-0.5">{t.fastMoving}</div>
                 </div>
                 <div className="flex-1">
-                  <div className="text-[10px] font-bold text-slate-500 uppercase">चाय / मसाले</div>
-                  <div className="text-xs font-black text-slate-800 mt-0.5">मुनाफ़ा लीडर</div>
+                  <div className="text-[10px] font-bold text-slate-500 uppercase">{t.teaSpices}</div>
+                  <div className="text-xs font-black text-slate-800 mt-0.5">{t.profitLeader}</div>
                 </div>
               </div>
             </section>

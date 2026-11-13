@@ -2,7 +2,7 @@ import React from "react";
 
 // =============================================================================
 // CUTE CARTOON RATION / KIRANA VECTOR ICONS
-// Vibrant, lo-fi, hand-crafted shopkeeper aesthetic
+// Vibrant, universal visual artwork — no hardcoded text in graphics
 // =============================================================================
 
 export function AttaSackIcon({ className = "w-8 h-8" }: { className?: string }) {
@@ -33,16 +33,13 @@ export function AttaSackIcon({ className = "w-8 h-8" }: { className?: string }) 
       />
       {/* Wheat Sheaf Doodle on Sack */}
       <path
-        d="M32 30V46M32 34L26 31M32 38L38 35M32 42L26 39"
+        d="M32 28V48M32 32L24 29M32 36L40 33M32 40L24 37M32 44L40 41"
         stroke="#FEF3C7"
         strokeWidth="2.5"
         strokeLinecap="round"
       />
-      {/* Text Stamp "ATTA" */}
-      <rect x="22" y="47" width="20" height="7" rx="3.5" fill="#78350F" />
-      <text x="32" y="52.5" fill="#FEF3C7" fontSize="5.5" fontWeight="900" textAnchor="middle" fontFamily="sans-serif">
-        आटा
-      </text>
+      {/* Warm Sack Stitch Border */}
+      <path d="M22 52H42" stroke="#78350F" strokeWidth="2" strokeDasharray="3 2" />
     </svg>
   );
 }
@@ -78,7 +75,7 @@ export function MustardOilIcon({ className = "w-8 h-8" }: { className?: string }
         fill="#F59E0B"
       />
       {/* Little Sparkle */}
-      <circle cx="34" cy="39" r="1" fill="#FEF3C7" />
+      <circle cx="34" cy="39" r="1.5" fill="#FEF3C7" />
     </svg>
   );
 }
@@ -99,13 +96,10 @@ export function ChaiPattiIcon({ className = "w-8 h-8" }: { className?: string })
       />
       {/* Gold Label Band */}
       <rect x="14" y="26" width="26" height="18" fill="#F59E0B" />
-      <text x="27" y="38" fill="#78350F" fontSize="6" fontWeight="900" textAnchor="middle" fontFamily="sans-serif">
-        चाय
-      </text>
       {/* Tea Leaf on Box */}
       <path
-        d="M27 20C24 22 24 25 27 25C30 25 30 22 27 20Z"
-        fill="#A7F3D0"
+        d="M27 30C23 33 23 38 27 38C31 38 31 33 27 30Z"
+        fill="#047857"
         stroke="#064E3B"
         strokeWidth="1.5"
       />
@@ -147,9 +141,7 @@ export function DesiGheeIcon({ className = "w-8 h-8" }: { className?: string }) 
       <ellipse cx="32" cy="18" rx="10" ry="2.5" fill="#FEF3C7" />
       {/* Traditional Sun/Swastik Stamp */}
       <circle cx="32" cy="36" r="8" fill="#F59E0B" stroke="#78350F" strokeWidth="1.5" />
-      <text x="32" y="39.5" fill="#78350F" fontSize="6" fontWeight="900" textAnchor="middle" fontFamily="sans-serif">
-        घी
-      </text>
+      <path d="M32 30V42M26 36H38" stroke="#FEF3C7" strokeWidth="2" strokeLinecap="round" />
       {/* Dipper / Ladle Handle */}
       <path d="M38 16L48 6" stroke="#78350F" strokeWidth="3" strokeLinecap="round" />
     </svg>
@@ -183,9 +175,6 @@ export function MasalaPackIcon({ className = "w-8 h-8" }: { className?: string }
       />
       {/* Chili Green Stem */}
       <path d="M38 28C40 26 42 27 41 29" stroke="#15803D" strokeWidth="2" strokeLinecap="round" />
-      <text x="32" y="44" fill="#78350F" fontSize="4.5" fontWeight="900" textAnchor="middle" fontFamily="sans-serif">
-        मसाला
-      </text>
     </svg>
   );
 }
@@ -210,9 +199,9 @@ export function DalBowlIcon({ className = "w-8 h-8" }: { className?: string }) {
       <circle cx="30" cy="26" r="1.5" fill="#FEF3C7" />
       {/* Badge label */}
       <rect x="22" y="36" width="20" height="12" rx="3" fill="#B45309" />
-      <text x="32" y="44" fill="#FEF3C7" fontSize="5.5" fontWeight="900" textAnchor="middle" fontFamily="sans-serif">
-        दाल
-      </text>
+      <circle cx="27" cy="42" r="2" fill="#FEF3C7" />
+      <circle cx="32" cy="42" r="2" fill="#FEF3C7" />
+      <circle cx="37" cy="42" r="2" fill="#FEF3C7" />
     </svg>
   );
 }
@@ -230,9 +219,9 @@ export function ChiniBagIcon({ className = "w-8 h-8" }: { className?: string }) 
       <rect x="28" y="34" width="6" height="6" rx="1" fill="#FFFFFF" stroke="#0284C7" strokeWidth="1.5" />
       {/* Label */}
       <rect x="22" y="44" width="20" height="8" rx="2" fill="#0284C7" />
-      <text x="32" y="50" fill="#FFFFFF" fontSize="5.5" fontWeight="900" textAnchor="middle" fontFamily="sans-serif">
-        चीनी
-      </text>
+      <circle cx="27" cy="48" r="1.5" fill="#FFFFFF" />
+      <circle cx="32" cy="48" r="1.5" fill="#FFFFFF" />
+      <circle cx="37" cy="48" r="1.5" fill="#FFFFFF" />
     </svg>
   );
 }
@@ -269,10 +258,7 @@ export function SabunBarIcon({ className = "w-8 h-8" }: { className?: string }) 
       <circle cx="48" cy="18" r="4" fill="#E0F2FE" stroke="#0284C7" strokeWidth="1.5" />
       <circle cx="53" cy="25" r="2.5" fill="#E0F2FE" stroke="#0284C7" strokeWidth="1.5" />
       <circle cx="44" cy="13" r="2" fill="#E0F2FE" stroke="#0284C7" strokeWidth="1" />
-      {/* Stamp text */}
-      <text x="32" y="38" fill="#065F46" fontSize="6" fontWeight="900" textAnchor="middle" fontFamily="sans-serif">
-        साबुन
-      </text>
+      <circle cx="32" cy="35" r="3" fill="#A7F3D0" />
     </svg>
   );
 }
@@ -290,11 +276,9 @@ export function KhataBookIcon({ className = "w-8 h-8" }: { className?: string })
       <path d="M14 18L22 10" stroke="#FBBF24" strokeWidth="2" />
       <path d="M42 10L50 18" stroke="#FBBF24" strokeWidth="2" />
       <path d="M42 56L50 48" stroke="#FBBF24" strokeWidth="2" />
-      {/* Center Auspicious Shubh Labh / Tilak Emblem */}
-      <circle cx="34" cy="30" r="9" fill="#FEF3C7" stroke="#B45309" strokeWidth="1.5" />
-      <text x="34" y="33" fill="#B45309" fontSize="6.5" fontWeight="900" textAnchor="middle" fontFamily="sans-serif">
-        खाता
-      </text>
+      {/* Center Auspicious Shubh Labh / Sun Emblem */}
+      <circle cx="34" cy="30" r="8" fill="#FEF3C7" stroke="#B45309" strokeWidth="1.5" />
+      <path d="M34 26V34M30 30H38" stroke="#B45309" strokeWidth="2" strokeLinecap="round" />
       {/* Golden Bookmark Ribbon hanging down */}
       <path d="M30 54V60L33 57L36 60V54" fill="#F59E0B" stroke="#78350F" strokeWidth="1" />
     </svg>
@@ -304,7 +288,7 @@ export function KhataBookIcon({ className = "w-8 h-8" }: { className?: string })
 export function ShopkeeperMascot({ className = "w-12 h-12" }: { className?: string }) {
   return (
     <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-      {/* Cute Cartoon Shopkeeper Mascot (दुकानदार भैया) */}
+      {/* Cute Cartoon Shopkeeper Mascot */}
       {/* Body / Kurta */}
       <path
         d="M14 58C14 46 22 42 32 42C42 42 50 46 50 58H14Z"
