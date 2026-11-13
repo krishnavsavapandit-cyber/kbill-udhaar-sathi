@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { KeyRound, Eye, EyeOff, ShieldCheck, Lock } from "lucide-react";
+import { KeyRound, Eye, EyeOff, ShieldCheck, Lock, HelpCircle } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { loginAction } from "@/app/actions";
@@ -56,7 +57,16 @@ export default function LoginPage() {
             </span>
           </div>
         </div>
-        <LanguageToggle />
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 px-3 py-1.5 rounded-xl transition-all"
+          >
+            <HelpCircle className="w-3.5 h-3.5 text-emerald-700" />
+            <span>{t.landingCtaHowItWorks}</span>
+          </Link>
+          <LanguageToggle />
+        </div>
       </header>
 
       {/* Main Login Card Centered */}

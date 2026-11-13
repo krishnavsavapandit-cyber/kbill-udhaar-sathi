@@ -90,6 +90,9 @@ export interface Translations {
   suggestedLimit: string;
   advisoryNote: string;
   scoreFactorsTitle: string;
+  bandGood: string;
+  bandWatch: string;
+  bandRisky: string;
   
   // Profit Saathi
   profitSaathiTitle: string;
@@ -152,6 +155,77 @@ export interface Translations {
   
   // WhatsApp Reminder template
   reminderMessage: (name: string, shop: string, amount: string) => string;
+
+  // Landing Page & Step-by-Step Explainer
+  landingTagline: string;
+  landingHeroTitle: string;
+  landingHeroSubtitle: string;
+  landingCtaStart: string;
+  landingCtaDashboard: string;
+  landingCtaHowItWorks: string;
+  landingTrust1: string;
+  landingTrust2: string;
+  landingTrust3: string;
+  landingTrust4: string;
+  alreadyLoggedInBanner: (name: string) => string;
+
+  howItWorksHeading: string;
+  howItWorksSubheading: string;
+
+  step1Badge: string;
+  step1Title: string;
+  step1Desc: string;
+  step1Feature1: string;
+  step1Feature2: string;
+  step1Feature3: string;
+
+  step2Badge: string;
+  step2Title: string;
+  step2Desc: string;
+  step2Feature1: string;
+  step2Feature2: string;
+  step2Feature3: string;
+
+  step3Badge: string;
+  step3Title: string;
+  step3Desc: string;
+  step3Feature1: string;
+  step3Feature2: string;
+  step3Feature3: string;
+
+  step4Badge: string;
+  step4Title: string;
+  step4Desc: string;
+  step4Feature1: string;
+  step4Feature2: string;
+  step4Feature3: string;
+
+  step5Badge: string;
+  step5Title: string;
+  step5Desc: string;
+  step5Feature1: string;
+  step5Feature2: string;
+  step5Feature3: string;
+
+  comparisonTitle: string;
+  comparisonSubtitle: string;
+  paperKhata: string;
+  paperPoint1: string;
+  paperPoint2: string;
+  paperPoint3: string;
+  paperPoint4: string;
+  paperPoint5: string;
+
+  digitalKhata: string;
+  digitalPoint1: string;
+  digitalPoint2: string;
+  digitalPoint3: string;
+  digitalPoint4: string;
+  digitalPoint5: string;
+
+  landingBottomCtaTitle: string;
+  landingBottomCtaDesc: string;
+  landingBottomCtaButton: string;
 }
 
 export const translations: Record<Language, Translations> = {
@@ -241,6 +315,9 @@ export const translations: Record<Language, Translations> = {
     suggestedLimit: "Suggested Limit",
     advisoryNote: "Advisory",
     scoreFactorsTitle: "Payment History & Score Factors",
+    bandGood: "Good",
+    bandWatch: "Watch",
+    bandRisky: "Risky",
 
     profitSaathiTitle: "Profit Saathi (Stock & Margin Assistant)",
     profitSaathiSubtitle: "30-day sales velocity, stock cover days & margin analytics",
@@ -301,6 +378,77 @@ export const translations: Record<Language, Translations> = {
 
     reminderMessage: (name: string, shop: string, amount: string) =>
       `Namaste ${name}, your balance at ${shop} is ₹${amount}. Please pay when convenient. Thank you!`,
+
+    // Landing Page & Step-by-Step Explainer
+    landingTagline: "Say goodbye to paper diaries! Simple, reliable digital khata & profit assistant.",
+    landingHeroTitle: "Replace Your Paper Diary with Smart Digital Khata",
+    landingHeroSubtitle: "Crafted specifically for small Indian kirana & retail shops. Instant credit recording, polite 1-tap WhatsApp reminders, automatic credit health scoring, and smart stock alerts.",
+    landingCtaStart: "Open Shop Khata / Login",
+    landingCtaDashboard: "Go to Shop Dashboard",
+    landingCtaHowItWorks: "See How It Works",
+    landingTrust1: "100% Private to Your Shop",
+    landingTrust2: "Exact Paise Math (Zero Calculation Errors)",
+    landingTrust3: "Single Password — No KYC or Signups",
+    landingTrust4: "Works Fluidly on Mobile, Tablet & PC",
+    alreadyLoggedInBanner: (name: string) => `Currently logged in as ${name}. Click to open your live dashboard ➔`,
+
+    howItWorksHeading: "How Udhaar Saathi Works (Step-by-Step)",
+    howItWorksSubheading: "Designed so any non-technical shopkeeper can use it effortlessly in under 30 seconds.",
+
+    step1Badge: "Step 1",
+    step1Title: "Instant Single-Password Access",
+    step1Desc: "No phone OTP delays, no complicated signups, and no messy forms. Enter your shop's secret password on your counter phone or PC, and your ledger opens instantly.",
+    step1Feature1: "Zero registration friction",
+    step1Feature2: "Protected session encryption",
+    step1Feature3: "Data is 100% private to your shop",
+
+    step2Badge: "Step 2",
+    step2Title: "Add Customers & Record Khata in Seconds",
+    step2Desc: "Add customers with their name and 10-digit mobile number. Record 'Credit Given' (उधार दिया) or 'Payment Received' (जमा किया) with a single tap. Ledger entries are strictly append-only so your audit trail is never lost.",
+    step2Feature1: "Real-time search by name or phone",
+    step2Feature2: "Negative balance safeguard for advances",
+    step2Feature3: "Reversal entries preserve complete history",
+
+    step3Badge: "Step 3",
+    step3Title: "1-Tap Polite WhatsApp Reminders",
+    step3Desc: "Never hesitate or feel awkward about asking neighbours for overdue dues. Tap one button to open WhatsApp with a respectful, pre-filled reminder in Hindi, English, or Assamese with the exact amount and shop name.",
+    step3Feature1: "No expensive WhatsApp Business API fees",
+    step3Feature2: "Polite pre-filled respectful message",
+    step3Feature3: "Opens directly in customer's WhatsApp",
+
+    step4Badge: "Step 4",
+    step4Title: "Smart Udhaar Score & Credit Limits",
+    step4Desc: "Know who pays on time and who delays! A 100% rule-based 0–100 score automatically categorizes customers into Good, Watch, or Risky based on FIFO payments and due dates (15th of next month in IST), suggesting safe credit limits.",
+    step4Feature1: "100% transparent & deterministic rules",
+    step4Feature2: "FIFO payment matching to oldest credit",
+    step4Feature3: "Advisory warnings prevent bad debt",
+
+    step5Badge: "Step 5",
+    step5Title: "Profit Saathi: Daily Profit & Stock Velocity",
+    step5Desc: "Stop letting valuable stock sit dead in godowns while fast-moving essentials run out. Profit Saathi tracks daily sales velocity, calculates days of stock remaining, suggests reorder amounts, and ranks your top moneymakers.",
+    step5Feature1: "Atomic concurrency prevents negative stock",
+    step5Feature2: "Automatic dead-stock detector (30 days)",
+    step5Feature3: "Optional AI morning briefing in your language",
+
+    comparisonTitle: "Paper Diary vs Udhaar Saathi",
+    comparisonSubtitle: "Why local shopkeepers are upgrading to digital khata",
+    paperKhata: "Old Paper Notebook (कागज़ी बही-खाता)",
+    paperPoint1: "Pages tear, smudge with oil/water, or get lost",
+    paperPoint2: "Mental addition mistakes lead to disputes & losses",
+    paperPoint3: "Hesitation & awkwardness asking neighbours for dues",
+    paperPoint4: "No idea which customer is becoming risky to lend to",
+    paperPoint5: "Dead stock sits forgotten in godown while essentials run out",
+
+    digitalKhata: "Udhaar Saathi (उधार साथी)",
+    digitalPoint1: "Always secure, accessible from phone or counter PC",
+    digitalPoint2: "Exact paise calculations, zero mathematical errors",
+    digitalPoint3: "1-click polite WhatsApp reminder in customer's language",
+    digitalPoint4: "Automatic Udhaar Score & safe suggested credit limits",
+    digitalPoint5: "Profit Saathi tracks stock days, reorders & top margins",
+
+    landingBottomCtaTitle: "Ready to Make Your Shop 100% Organized & Profitable?",
+    landingBottomCtaDesc: "Takes less than 1 minute to start. Open your digital khata now!",
+    landingBottomCtaButton: "Open My Shop Khata Now",
   },
 
   hi: {
@@ -389,6 +537,9 @@ export const translations: Record<Language, Translations> = {
     suggestedLimit: "सुझाया गया लिमिट",
     advisoryNote: "सलाहकारी",
     scoreFactorsTitle: "भुगतान इतिहास व स्कोर कारक",
+    bandGood: "अच्छा (Good)",
+    bandWatch: "सतर्क (Watch)",
+    bandRisky: "जोखिम (Risky)",
 
     profitSaathiTitle: "Profit Saathi (राशन व मुनाफा साथी)",
     profitSaathiSubtitle: "30-दिनों की बिक्री से स्टॉक के दिन, रिऑर्डर मात्रा व मुनाफ़ा विश्लेषण",
@@ -449,6 +600,77 @@ export const translations: Record<Language, Translations> = {
 
     reminderMessage: (name: string, shop: string, amount: string) =>
       `नमस्ते ${name} जी, ${shop} पर आपका ₹${amount} बकाया है। कृपया सुविधानुसार भुगतान कर दें। धन्यवाद!`,
+
+    // Landing Page & Step-by-Step Explainer
+    landingTagline: "पुराने कागज़ी बही-खाते को कहें अलविदा! दुकानदारों का सरल, सुरक्षित डिजिटल खाता।",
+    landingHeroTitle: "कागज़ी डायरी छोड़ें, अपनाएं स्मार्ट डिजिटल खाता",
+    landingHeroSubtitle: "भारतीय किराना व खुदरा दुकानदारों के लिए विशेष रूप से निर्मित। झटपट उधार-जमा हिसाब, 1-टैप विनम्र व्हाट्सएप तगादा, स्वचालित उधार साख स्कोर और स्टॉक-मुनाफ़े की सटीक जानकारी।",
+    landingCtaStart: "दुकान खाता खोलें / लॉगिन करें",
+    landingCtaDashboard: "दुकान डैशबोर्ड पर जाएं",
+    landingCtaHowItWorks: "देखें कैसे काम करता है",
+    landingTrust1: "आपकी दुकान का 100% निजी डेटा",
+    landingTrust2: "पाई-पाई का सटीक हिसाब (ज़ीरो गलती)",
+    landingTrust3: "सिर्फ एक पासवर्ड — कोई फॉर्म या केवाईसी नहीं",
+    landingTrust4: "मोबाइल, टैबलेट और पीसी पर एकदम आसान",
+    alreadyLoggedInBanner: (name: string) => `दुकान '${name}' में लॉगिन हैं। सीधे लाइव डैशबोर्ड पर जाने के लिए यहां क्लिक करें ➔`,
+
+    howItWorksHeading: "उधार साथी कैसे काम करता है? (कदम-दर-कदम समझें)",
+    howItWorksSubheading: "किसी भी गैर-तकनीकी दुकानदार के लिए 30 सेकंड में समझने और इस्तेमाल करने योग्य।",
+
+    step1Badge: "कदम 1",
+    step1Title: "सिर्फ एक पासवर्ड से तुरंत लॉगिन",
+    step1Desc: "न कोई ओटीपी, न लंबा फॉर्म, न कोई झंझट। अपनी दुकान के काउंटर फोन या कंप्यूटर पर सिर्फ अपना गुप्त पासवर्ड डालें और आपकी पूरी दुकान का खाता तुरंत खुल जाएगा।",
+    step1Feature1: "बिना किसी साइनअप या कागजी औपचारिकता के",
+    step1Feature2: "सुरक्षित सेशन और कड़ा डेटा पहरा",
+    step1Feature3: "खाता केवल आपकी दुकान के लिए निजी",
+
+    step2Badge: "कदम 2",
+    step2Title: "ग्राहक जोड़ें और 5 सेकंड में बही-खाता लिखें",
+    step2Desc: "ग्राहक का नाम और 10 अंकों का मोबाइल नंबर डालें। 'उधार दिया' (+ Credit) या 'जमा किया' (- Payment) एक टैप में दर्ज करें। हिसाब हमेशा सुरक्षित और पारदर्शी रहता है।",
+    step2Feature1: "नाम या फोन नंबर से तुरंत खोजें",
+    step2Feature2: "गलती से ज्यादा जमा रोकने के लिए सुरक्षा चेतावनी",
+    step2Feature3: "रिवर्सल एंट्री से पूरा लेन-देन रिकॉर्ड सुरक्षित",
+
+    step3Badge: "कदम 3",
+    step3Title: "1-क्लिक में विनम्र व्हाट्सएप तगादा भेजें",
+    step3Desc: "पड़ोसी या ग्राहक से उधारी मांगते समय कोई झिझक या शर्म नहीं। सिर्फ एक बटन दबाएं और ग्राहक की भाषा (हिंदी/अंग्रेजी/असमिया) में बना-बनाया विनम्र संदेश व्हाट्सएप पर खुल जाएगा।",
+    step3Feature1: "बिना किसी महंगे व्हाट्सएप बिजनेस चार्ज के",
+    step3Feature2: "सटीक बकाया राशि और दुकान के नाम के साथ",
+    step3Feature3: "सीधे ग्राहक के व्हाट्सएप चैट में खुलता है",
+
+    step4Badge: "कदम 4",
+    step4Title: "स्मार्ट उधार स्कोर और सुरक्षा लिमिट",
+    step4Desc: "कौन समय पर पैसा लौटाता है और कौन लटकाता है? 100% पारदर्शी नियमों के साथ 0-100 का उधार स्कोर ग्राहकों को 'अच्छा', 'सतर्क' या 'जोखिम' में बांटता है और सुरक्षित उधार सीमा बताता है।",
+    step4Feature1: "100% स्पष्ट नियम (कोई गुप्त एआई नहीं)",
+    step4Feature2: "पुराने उधार को पहले चुकता करने का नियम (FIFO)",
+    step4Feature3: "उधार सीमा से ज्यादा जाने पर सतर्क करने वाली चेतावनी",
+
+    step5Badge: "कदम 5",
+    step5Title: "प्रॉफ़िट साथी: दैनिक बिक्री और स्टॉक सुरक्षा",
+    step5Desc: "गोदाम में रुका हुआ माल पहचानें और रोज बिकने वाली आवश्यक वस्तुओं को खत्म होने से पहले मंगाएं। दैनिक बिक्री की रफ़्तार, बचे हुए दिन, ऑर्डर करने की सलाह और सबसे ज्यादा मुनाफा देने वाले उत्पाद देखें।",
+    step5Feature1: "समानांतर बिक्री में भी स्टॉक कभी माइनस नहीं जाता",
+    step5Feature2: "30 दिनों से न बिकने वाले सामान (Dead Stock) की पहचान",
+    step5Feature3: "दुकानदार के लिए सुबह की सरल भाषा में ब्रीफिंग",
+
+    comparisonTitle: "पुराना कागज़ी रजिस्टर बनाम उधार साथी",
+    comparisonSubtitle: "जानिए क्यों हजारों दुकानदार डिजिटल खाते पर भरोसा करते हैं",
+    paperKhata: "पुराना कागज़ी खाता",
+    paperPoint1: "पन्ने फटना, तेल-पानी या सीलन से खराब होना",
+    paperPoint2: "जोड़-घटाव में गलती से नुकसान या ग्राहक से विवाद",
+    paperPoint3: "उधार का तगादा करने में शर्म और रिश्तों में खटास",
+    paperPoint4: "कौन सा ग्राहक कितना लेट है, इसका कोई सही अंदाज नहीं",
+    paperPoint5: "दुकान में कौन सा माल रुका पड़ा है, पता ही नहीं चलता",
+
+    digitalKhata: "उधार साथी (डिजिटल खाता)",
+    digitalPoint1: "हमेशा सुरक्षित, मोबाइल व कंप्यूटर पर कभी भी उपलब्ध",
+    digitalPoint2: "पाई-पाई का सटीक हिसाब, शून्य गलती",
+    digitalPoint3: "1-क्लिक में शिष्ट और विनम्र व्हाट्सएप संदेश",
+    digitalPoint4: "ऑटोमैटिक उधार स्कोर और सुरक्षित लिमिट की सलाह",
+    digitalPoint5: "प्रॉफ़िट साथी से स्टॉक के दिन और मुनाफे की पूरी जानकारी",
+
+    landingBottomCtaTitle: "क्या आप अपनी दुकान को 100% व्यवस्थित और मुनाफ़ेदार बनाने के लिए तैयार हैं?",
+    landingBottomCtaDesc: "शुरू करने में 1 मिनट से भी कम समय लगता है। अभी अपनी दुकान का खाता खोलें!",
+    landingBottomCtaButton: "अपनी दुकान का खाता खोलें",
   },
 
   as: {
@@ -537,6 +759,9 @@ export const translations: Record<Language, Translations> = {
     suggestedLimit: "পৰামৰ্শিত সীমা",
     advisoryNote: "পৰামৰ্শমূলক",
     scoreFactorsTitle: "পৰিশোধৰ ইতিহাস আৰু কাৰক",
+    bandGood: "ভাল (Good)",
+    bandWatch: "নজৰ ৰাখক (Watch)",
+    bandRisky: "বিপদজনক (Risky)",
 
     profitSaathiTitle: "প্ৰফিট সাৰথী (ৰেচন আৰু লাভ সাৰথী)",
     profitSaathiSubtitle: "৩০ দিনৰ বিক্ৰী, ষ্টকৰ দিন আৰু লাভৰ বিশ্লেষণ",
@@ -597,5 +822,76 @@ export const translations: Record<Language, Translations> = {
 
     reminderMessage: (name: string, shop: string, amount: string) =>
       `নমস্কাৰ ${name}, ${shop} ত আপোনাৰ বাকী আছে ₹${amount}। অনুগ্ৰহ কৰি সুবিধা অনুযায়ী পৰিশোধ কৰিব। ধন্যবাদ!`,
+
+    // Landing Page & Step-by-Step Explainer
+    landingTagline: "পুৰণি কাগজৰ খাতা এৰি স্মাৰ্ট ডিজিটেল খাতা ব্যৱহাৰ কৰক! সহজ আৰু নিৰ্ভৰযোগ্য।",
+    landingHeroTitle: "কাগজৰ ডায়েৰী এৰি স্মাৰ্ট ডিজিটেল খাতা ব্যৱহাৰ কৰক",
+    landingHeroSubtitle: "স্থানীয় গেলামাল আৰু খুচুৰা ব্যৱসায়ীসকলৰ বাবে বিশেষভাৱে নিৰ্মিত। খৰতকীয়া ধাৰৰ হিচাপ, ১-ক্লিকত বিনম্ৰ হোৱাটছএপ সোঁৱৰণি, ধাৰ স্ক'ৰ আৰু মজুত সামগ্ৰীৰ সঠিক তথ্য।",
+    landingCtaStart: "দোকানৰ খাতা খোলক / লগইন কৰক",
+    landingCtaDashboard: "দোকানৰ ডেছব'ৰ্ডলৈ যাওক",
+    landingCtaHowItWorks: "কেনেদৰে কাম কৰে চাওক",
+    landingTrust1: "আপোনাৰ দোকানৰ বাবে ১০০% ব্যক্তিগত",
+    landingTrust2: "পইচাৰ সঠিক হিচাপ (কোনো ভুল নহয়)",
+    landingTrust3: "কেৱল এটা পাছৱৰ্ড — কোনো ফৰ্ম বা কেৱাইচি নাই",
+    landingTrust4: "ম'বাইল, টেবলেট আৰু কম্পিউটাৰত সহজ ব্যৱহাৰ",
+    alreadyLoggedInBanner: (name: string) => `দোকান '${name}' ত লগইন হৈ আছে। পোনপটীয়াকৈ ডেছব'ৰ্ডলৈ যাবলৈ ইয়াত ক্লিক কৰক ➔`,
+
+    howItWorksHeading: "ধাৰ সাৰথী কেনেদৰে কাম কৰে? (খোজ-ক্ৰমে বুজি লওক)",
+    howItWorksSubheading: "যিকোনো সাধাৰণ দোকানীৰ বাবে ৩০ ছেকেণ্ডতে বুজিব পৰা সহজ ব্যৱস্থা।",
+
+    step1Badge: "খোজ ১",
+    step1Title: "মাত্ৰ এটা পাছৱৰ্ডেৰে লগে লগে লগইন",
+    step1Desc: "কোনো ওটিপি নাই, কোনো দীঘলীয়া পঞ্জীয়ন নাই। দোকানৰ কাউণ্টাৰৰ ম'বাইল বা কম্পিউটাৰত গোপন পাছৱৰ্ড দিয়ক আৰু লগে লগে আপোনাৰ দোকানৰ খাতা খোল খাব।",
+    step1Feature1: "বিনা কোনো পঞ্জীয়ন বা ঝামেলার",
+    step1Feature2: "সুৰক্ষিত ছেছন আৰু ডাটাৰ সম্পূৰ্ণ সুৰক্ষা",
+    step1Feature3: "খাতা কেৱল আপোনাৰ দোকানৰ বাবে ব্যক্তিগত",
+
+    step2Badge: "খোজ ২",
+    step2Title: "গ্ৰাহক যোগ কৰক আৰু ৫ ছেকেণ্ডতে খাতা লিখক",
+    step2Desc: "গ্ৰাহকৰ নাম আৰু ১০ টা সংখ্যাৰ ম'বাইল নম্বৰ দিয়ক। 'ধাৰ দিয়া' (+ Credit) বা 'টকা জমা' (- Payment) এটা ক্লিকতে লিপিবদ্ধ কৰক। হিচাপ সদায় স্পষ্ট আৰু সুৰক্ষিত।",
+    step2Feature1: "নাম বা ফোন নম্বৰেৰে লগে লগে বিচাৰক",
+    step2Feature2: "ভুলবশতঃ অধিক টকা লোৱা ৰোধ কৰিবলৈ সতৰ্কবাৰ্তা",
+    step2Feature3: "পূৰ্বৰ সকলো লেনদেনৰ সম্পূৰ্ণ তথ্য সুৰক্ষিত",
+
+    step3Badge: "খোজ ৩",
+    step3Title: "১-ক্লিকতে বিনম্ৰ হোৱাটছএপ সোঁৱৰণি পঠিয়াওক",
+    step3Desc: "চুবুৰীয়া বা গ্ৰাহকৰ পৰা বাকী টকা বিচৰাত কোনো লাজ বা দ্বিধা নাই। এটা বুটাম টিপিলেই অসমীয়া/হিন্দী/ইংৰাজীত প্ৰস্তুত কৰা বিনম্ৰ বাৰ্তা হোৱাটছএপত খোল খাব।",
+    step3Feature1: "কোনো খৰচী হোৱাটছএপ বিজনেছ মাচুল নাই",
+    step3Feature2: "বাকী থকা সঠিক টকা আৰু দোকানৰ নামৰ সৈতে",
+    step3Feature3: "পোনপটীয়াকৈ গ্ৰাহকৰ হোৱাটছএপত খোল খায়",
+
+    step4Badge: "খোজ ৪",
+    step4Title: "স্মাৰ্ট ধাৰ স্ক'ৰ আৰু সুৰক্ষা লিমিট",
+    step4Desc: "কোনে সময়ত টকা ঘূৰাই দিয়ে আৰু কোনে পলম কৰে? ১০০% স্পষ্ট নিয়মেৰে ০-১০০ ৰ ধাৰ স্ক'ৰে গ্ৰাহকক 'ভাল', 'নজৰ ৰাখক' বা 'বিপদজনক' হিচাপে ভাগ কৰে আৰু নিৰাপদ ধাৰৰ পৰামৰ্শ দিয়ে।",
+    step4Feature1: "১০০% স্পষ্ট আৰু নিৰ্দিষ্ট নিয়ম",
+    step4Feature2: "পুৰণি ধাৰ প্ৰথমে পৰিশোধ কৰাৰ নিয়ম (FIFO)",
+    step4Feature3: "ধাৰৰ সীমা পাৰ হ'লে সতৰ্ক কৰি দিয়া ব্যৱস্থা",
+
+    step5Badge: "খোজ ৫",
+    step5Title: "লাভ সাৰথী: দৈনিক বিক্ৰী আৰু মজুত সামগ্ৰীৰ নিৰাপত্তা",
+    step5Desc: "বিক্ৰী নোহোৱা পুৰণি সামগ্ৰী চিনাক্ত কৰক আৰু প্ৰয়োজনীয় সামগ্ৰী শেষ হোৱাৰ আগতেই আনক। দৈনিক বিক্ৰীৰ গতি, মজুত থকা দিন আৰু সৰ্বাধিক লাভ দিয়া সামগ্ৰী চাওক।",
+    step5Feature1: "একে সময়তে বিক্ৰী হ'লেও মজুত কেতিয়াও ঋণাত্মক নহয়",
+    step5Feature2: "৩০ দিন ধৰি বিক্ৰী নোহোৱা সামগ্ৰীৰ (Dead Stock) সন্ধান",
+    step5Feature3: "দোকানীৰ বাবে পুৱাৰ সহজ ভাষাত চমু বতৰা",
+
+    comparisonTitle: "পুৰণি কাগজৰ বহী বনাম ধাৰ সাৰথী",
+    comparisonSubtitle: "দোকানীসকলে কিয় ডিজিটেল খাতা পছন্দ কৰে জানক",
+    paperKhata: "পুৰণি কাগজৰ খাতা",
+    paperPoint1: "পৃষ্ঠা ফটা, পানী বা তেলেৰে নষ্ট হোৱাৰ ভয়",
+    paperPoint2: "যোগ-বিয়োগত ভুল হৈ লোকচান বা গ্ৰাহকৰ সৈতে বাক-বিতণ্ডা",
+    paperPoint3: "টকা খুজিবলৈ লাজ লগা আৰু সম্পৰ্ক নষ্ট হোৱাৰ শংকা",
+    paperPoint4: "কোন গ্ৰাহকে কিমান পলম কৰিছে বুজিবলৈ অসুবিধা",
+    paperPoint5: "দোকানত কি সামগ্ৰী পৰি ৰৈছে বুজি পোৱা নাযায়",
+
+    digitalKhata: "ধাৰ সাৰথী (ডিজিটেল খাতা)",
+    digitalPoint1: "সদায় সুৰক্ষিত, ম'বাইল আৰু কম্পিউটাৰত উপলব্ধ",
+    digitalPoint2: "পইচাৰ সঠিক হিচাপ, কোনো ভুল নহয়",
+    digitalPoint3: "১-ক্লিকতে বিনম্ৰ হোৱাটছএপ বাৰ্তা",
+    digitalPoint4: "স্বয়ংক্ৰিয় ধাৰ স্ক'ৰ আৰু নিৰাপদ সীমাৰ পৰামৰ্শ",
+    digitalPoint5: "লাভ সাৰথীৰ দ্বাৰা সামগ্ৰী আৰু লাভৰ সঠিক তথ্য",
+
+    landingBottomCtaTitle: "আপোনাৰ দোকানখন ১০০% সুশৃংখল আৰু লাভজনক কৰিবলৈ সাজুনে?",
+    landingBottomCtaDesc: "আৰম্ভ কৰিবলৈ ১ মিনিটতকৈও কম সময় লাগে। এতিয়াই ডিজিটেল খাতা খোলক!",
+    landingBottomCtaButton: "মোৰ দোকানৰ খাতা খোলক",
   },
 };

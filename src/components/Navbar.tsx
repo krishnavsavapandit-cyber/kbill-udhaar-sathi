@@ -10,6 +10,7 @@ import {
   UserPlus,
   LogOut,
   Store,
+  HelpCircle,
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { LanguageToggle } from "./LanguageToggle";
@@ -33,7 +34,7 @@ export function Navbar({ shopName = "Udhaar Saathi", isDemo = false }: NavbarPro
     }
   };
 
-  const isDashboard = pathname === "/dashboard" || pathname === "/";
+  const isDashboard = pathname === "/dashboard";
   const isCustomers = pathname.startsWith("/customers");
   const isProfit = pathname.startsWith("/profit-saathi");
 
@@ -116,8 +117,16 @@ export function Navbar({ shopName = "Udhaar Saathi", isDemo = false }: NavbarPro
           </Link>
         </nav>
 
-        {/* Right: Language Toggle & Logout */}
+        {/* Right: Help/Guide, Language Toggle & Logout */}
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          <Link
+            href="/"
+            title={t.landingCtaHowItWorks}
+            className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-bold text-emerald-100 hover:text-white bg-emerald-900/40 hover:bg-emerald-700/80 border border-emerald-700/60 rounded-xl transition-all"
+          >
+            <HelpCircle className="w-3.5 h-3.5 text-amber-300" />
+            <span className="hidden xl:inline">{t.landingCtaHowItWorks}</span>
+          </Link>
           <LanguageToggle />
           <button
             onClick={handleLogout}

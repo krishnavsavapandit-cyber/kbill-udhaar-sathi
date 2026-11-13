@@ -389,7 +389,11 @@ export function CustomerLedgerClient({
                               : "bg-rose-600 text-white"
                           }`}
                         >
-                          {customer.scoreResult.band}
+                          {customer.scoreResult.band === "Good"
+                            ? t.bandGood
+                            : customer.scoreResult.band === "Watch"
+                            ? t.bandWatch
+                            : t.bandRisky}
                         </span>
                       </div>
                       <p className="text-xs text-slate-500 font-semibold mt-0.5">

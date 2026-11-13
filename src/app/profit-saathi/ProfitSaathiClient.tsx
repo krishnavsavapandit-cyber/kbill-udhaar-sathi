@@ -192,50 +192,50 @@ export function ProfitSaathiClient({
 
         {/* Top Metric Cards: 4 columns on Desktop / 2 on Mobile */}
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <div className="bg-white rounded-2xl p-4 border-2 border-amber-900/10 shadow-sm">
-            <div className="text-[11px] font-black text-slate-400 uppercase tracking-wider">
+          <div className="bg-gradient-to-br from-indigo-50 via-white to-blue-50 rounded-2xl p-4 border-2 border-indigo-200 shadow-sm">
+            <div className="text-[11px] font-black text-indigo-700 uppercase tracking-wider">
               {t.totalStockCost}
             </div>
-            <div className="text-xl sm:text-2xl font-black text-slate-900 mt-1">
+            <div className="text-xl sm:text-2xl font-black text-indigo-950 mt-1">
               {formatINR(report.totalInventoryCostPaise)}
             </div>
-            <div className="text-[11px] text-slate-500 font-semibold mt-0.5">
+            <div className="text-[11px] text-indigo-800/80 font-semibold mt-0.5">
               {t.sellingValue}: {formatINR(report.totalInventoryValuePaise)}
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-4 border-2 border-amber-900/10 shadow-sm">
-            <div className="text-[11px] font-black text-slate-400 uppercase tracking-wider">
+          <div className="bg-gradient-to-br from-amber-50 via-white to-orange-50 rounded-2xl p-4 border-2 border-amber-300 shadow-sm">
+            <div className="text-[11px] font-black text-amber-800 uppercase tracking-wider">
               {t.lowStockBadge}
             </div>
-            <div className="text-xl sm:text-2xl font-black text-amber-600 mt-1">
+            <div className="text-xl sm:text-2xl font-black text-amber-700 mt-1">
               {report.lowStockItemsCount} {t.units}
             </div>
-            <div className="text-[11px] text-amber-700 font-semibold mt-0.5">
+            <div className="text-[11px] text-amber-800 font-semibold mt-0.5">
               {t.needsReorderSoon}
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-4 border-2 border-amber-900/10 shadow-sm">
-            <div className="text-[11px] font-black text-slate-400 uppercase tracking-wider">
+          <div className="bg-gradient-to-br from-rose-50 via-white to-red-50 rounded-2xl p-4 border-2 border-rose-200 shadow-sm">
+            <div className="text-[11px] font-black text-rose-700 uppercase tracking-wider">
               {t.deadStockBadge}
             </div>
-            <div className="text-xl sm:text-2xl font-black text-rose-600 mt-1">
+            <div className="text-xl sm:text-2xl font-black text-rose-700 mt-1">
               {report.totalDeadStockItemsCount} {t.units}
             </div>
-            <div className="text-[11px] text-rose-700 font-semibold mt-0.5">
+            <div className="text-[11px] text-rose-800 font-semibold mt-0.5">
               {t.noSales30Days}
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-4 border-2 border-amber-900/10 shadow-sm">
-            <div className="text-[11px] font-black text-slate-400 uppercase tracking-wider">
+          <div className="bg-gradient-to-br from-emerald-50 via-white to-teal-50 rounded-2xl p-4 border-2 border-emerald-200 shadow-sm">
+            <div className="text-[11px] font-black text-emerald-800 uppercase tracking-wider">
               {t.activeItemsCount}
             </div>
-            <div className="text-xl sm:text-2xl font-black text-emerald-700 mt-1">
+            <div className="text-xl sm:text-2xl font-black text-emerald-800 mt-1">
               {report.items.length} {t.units}
             </div>
-            <div className="text-[11px] text-emerald-800 font-semibold mt-0.5">
+            <div className="text-[11px] text-emerald-900 font-semibold mt-0.5">
               {t.regularStock}
             </div>
           </div>

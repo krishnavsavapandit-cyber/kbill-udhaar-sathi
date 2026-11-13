@@ -10,7 +10,7 @@ export function BottomNav() {
   const pathname = usePathname();
   const { t } = useLanguage();
 
-  const isDashboard = pathname === "/dashboard" || pathname === "/";
+  const isDashboard = pathname === "/dashboard";
   const isCustomers = pathname.startsWith("/customers");
   const isProfit = pathname.startsWith("/profit-saathi");
 
