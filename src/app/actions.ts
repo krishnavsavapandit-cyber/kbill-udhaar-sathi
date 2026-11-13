@@ -14,6 +14,11 @@ import {
 import { customerSchema, ledgerEntrySchema } from "@/lib/validations";
 import { rupeesToPaise } from "@/lib/money";
 import { computeUdhaarScore, UdhaarScoreResult } from "@/lib/udhaarScore";
+import {
+  calculateProfitSaathiMetrics,
+  getPlainLanguageSummary,
+  ProfitSaathiReport,
+} from "@/lib/profitSaathi";
 
 export interface ActionResult<T = unknown> {
   success: boolean;
@@ -532,4 +537,146 @@ export async function getDashboardData() {
     top5Owed,
     recentEntries,
   };
+}
+
+// -----------------------------------------------------------------------------
+// Part 3: Profit Saathi Actions (Items, Stock & Sales)
+// -----------------------------------------------------------------------------
+
+export async function createItem(data: {
+  name: string;
+  costRupees: number;
+  priceRupees: number;
+  quantity: number;
+  category?: string;
+}): Promise<ActionResult<{ itemId: string }>> {
+  try {
+    const shop = await requireShop();
+
+    if (!data.name || data.name.trim().length < 2) {
+      return { success: false, error: "Item name must be at least 2 characters" };
+    }
+    if (typeof data.costRupees !== "number" || data.costRupees < 0) {
+      return { success: false, error: "Cost price cannot be negative" };
+    }
+    if (typeof data.priceRupees !== "number" || data.priceRupees <= 0) {
+      return { success: false, error: "Selling price must be greater than zero" };
+    }
+    if (!Number.isInteger(data.quantity) || data.quantity < 0) {
+      return { success: false, error: "Stock quantity must be a non-negative integer" };
+    }
+
+    const item = await prisma.item.create({
+      data: {
+        shopId: shop.id,
+        name: data.name.trim(),
+        costPaise: rupeesToPaise(data.costRupees),
+        pricePaise: rupeesToPaise(data.priceRupees),
+        quantity: data.quantity,
+        category: data.category?.trim() || null,
+      },
+    });
+
+    revalidatePath("/profit-saathi");
+    return { success: true, data: { itemId: item.id } };
+  } catch (err: unknown) {
+    if (err instanceof UnauthorizedError) {
+      return { success: false, error: "UNAUTHORIZED" };
+    }
+    const message = err instanceof Error ? err.message : "Failed to create item";
+    return { success: false, error: message };
+  }
+}
+
+export async function recordSale(data: {
+  itemId: string;
+  quantity: number;
+}): Promise<ActionResult> {
+  try {
+    const shop = await requireShop();
+
+    if (!Number.isInteger(data.quantity) || data.quantity <= 0) {
+      return { success: false, error: "Sale quantity must be a positive integer" };
+    }
+
+    const item = await prisma.item.findFirst({
+      where: {
+        id: data.itemId,
+        shopId: shop.id,
+      },
+    });
+
+    if (!item) {
+      return { success: false, error: "Item not found" };
+    }
+
+    // Rule: "sales that reduce stock and never go negative"
+    if (item.quantity < data.quantity) {
+      return {
+        success: false,
+        error: `Insufficient stock. Current stock is ${item.quantity}, requested sale is ${data.quantity}`,
+      };
+    }
+
+    // Record sale and atomically decrement stock
+    await prisma.$transaction([
+      prisma.sale.create({
+        data: {
+          shopId: shop.id,
+          itemId: item.id,
+          quantity: data.quantity,
+          unitPricePaise: item.pricePaise,
+          totalPaise: item.pricePaise * data.quantity,
+        },
+      }),
+      prisma.item.update({
+        where: { id: item.id },
+        data: {
+          quantity: item.quantity - data.quantity,
+        },
+      }),
+    ]);
+
+    revalidatePath("/profit-saathi");
+    return { success: true };
+  } catch (err: unknown) {
+    if (err instanceof UnauthorizedError) {
+      return { success: false, error: "UNAUTHORIZED" };
+    }
+    const message = err instanceof Error ? err.message : "Failed to record sale";
+    return { success: false, error: message };
+  }
+}
+
+export async function getProfitSaathiReport(lang: "en" | "hi" = "en"): Promise<ActionResult<ProfitSaathiReport>> {
+  try {
+    const shop = await requireShop();
+
+    const items = await prisma.item.findMany({
+      where: { shopId: shop.id },
+      include: {
+        sales: {
+          orderBy: { createdAt: "desc" },
+        },
+      },
+      orderBy: { name: "asc" },
+    });
+
+    const report = calculateProfitSaathiMetrics(items);
+    const aiSummary = await getPlainLanguageSummary(report, lang);
+
+    return {
+      success: true,
+      data: {
+        ...report,
+        aiSummary,
+      },
+    };
+  } catch (err: unknown) {
+    if (err instanceof UnauthorizedError) {
+      return { success: false, error: "UNAUTHORIZED" };
+    }
+    const message = err instanceof Error ? err.message : "Failed to generate Profit Saathi report";
+    return { success: false, error: message };
+  }
 }

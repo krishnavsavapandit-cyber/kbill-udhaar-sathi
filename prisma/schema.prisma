@@ -11,16 +11,18 @@ datasource db {
 }
 
 model Shop {
-  id                  String        @id @default(cuid())
-  name                String        @default("Gupta Kirana & General Store")
-  ownerName           String        @default("Ramesh Gupta")
-  phone               String?
-  isDemo              Boolean       @default(false)
-  baseCreditLimitPaise Int          @default(500000) // Default ₹5,000 base credit limit
-  createdAt           DateTime      @default(now())
-  updatedAt           DateTime      @updatedAt
-  customers           Customer[]
-  entries             LedgerEntry[]
+  id                   String        @id @default(cuid())
+  name                 String        @default("Gupta Kirana & General Store")
+  ownerName            String        @default("Ramesh Gupta")
+  phone                String?
+  isDemo               Boolean       @default(false)
+  baseCreditLimitPaise Int           @default(500000) // Default ₹5,000 base credit limit
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  customers            Customer[]
+  entries              LedgerEntry[]
+  items                Item[]
+  sales                Sale[]
 }
 
 model Customer {
@@ -49,4 +51,35 @@ model LedgerEntry {
 
   @@index([shopId])
   @@index([customerId])
+}
+
+model Item {
+  id         String   @id @default(cuid())
+  shopId     String
+  name       String
+  costPaise  Int      // Cost price in paise
+  pricePaise Int      // Selling price in paise
+  quantity   Int      // Current stock quantity (never negative)
+  category   String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  shop       Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  sales      Sale[]
+
+  @@index([shopId])
+}
+
+model Sale {
+  id             String   @id @default(cuid())
+  shopId         String
+  itemId         String
+  quantity       Int      // Quantity sold (positive integer)
+  unitPricePaise Int      // Selling price per unit in paise
+  totalPaise     Int      // quantity * unitPricePaise
+  createdAt      DateTime @default(now())
+  shop           Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  item           Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@index([shopId])
+  @@index([itemId])
 }

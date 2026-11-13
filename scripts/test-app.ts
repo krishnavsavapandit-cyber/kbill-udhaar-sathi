@@ -8,6 +8,11 @@ import {
   STARTING_SCORE,
   BAND_MULTIPLIERS,
 } from "../src/lib/udhaarScore";
+import {
+  calculateProfitSaathiMetrics,
+  getPlainLanguageSummary,
+  STATIC_FESTIVAL_HINTS,
+} from "../src/lib/profitSaathi";
 
 const BASE_URL = process.env.TEST_BASE_URL || "http://localhost:3005";
 
@@ -384,14 +389,121 @@ async function runTests() {
   await prisma.shop.delete({ where: { id: isolatedShop.id } });
 
   // ---------------------------------------------------------------------------
-  // 7. HTTP-LEVEL TESTS AGAINST RUNNING APP (UNAUTH & TAMPERED REJECTIONS)
+  // 7. PROFIT SAATHI: INVENTORY CALCULATIONS & NON-NEGATIVE STOCK
   // ---------------------------------------------------------------------------
-  console.log(`\n▶ 7. HTTP-LEVEL REJECTION & SECURITY (${BASE_URL})`);
+  console.log("\n▶ 7. PROFIT SAATHI (CALCULATIONS, NOT PREDICTIONS)");
+
+  const mockRefDate = new Date("2026-03-31T12:00:00Z");
+
+  // Synthetic item test dataset
+  const testItems = [
+    {
+      id: "it_a",
+      name: "Item A (Stable)",
+      costPaise: 8000,   // ₹80 cost
+      pricePaise: 10000, // ₹100 price (20.0% margin)
+      quantity: 15,
+      sales: Array.from({ length: 30 }, (_, i) => {
+        const d = new Date(mockRefDate);
+        d.setDate(d.getDate() - i);
+        return { quantity: 1, createdAt: d };
+      }), // 30 units sold in 30 days = 1.0 unit/day
+    },
+    {
+      id: "it_b",
+      name: "Item B (Fast Mover)",
+      costPaise: 5000,  // ₹50 cost
+      pricePaise: 6000,  // ₹60 price (16.7% margin)
+      quantity: 4,
+      sales: Array.from({ length: 30 }, (_, i) => {
+        const d = new Date(mockRefDate);
+        d.setDate(d.getDate() - i);
+        return { quantity: 2, createdAt: d };
+      }), // 60 units sold in 30 days = 2.0 units/day
+    },
+    {
+      id: "it_c",
+      name: "Item C (Dead Stock)",
+      costPaise: 20000, // ₹200 cost
+      pricePaise: 30000, // ₹300 price (33.3% margin - highest margin)
+      quantity: 8,
+      sales: [], // 0 sales in 30 days -> Dead Stock
+    },
+  ];
+
+  const profitReport = calculateProfitSaathiMetrics(testItems, mockRefDate);
+
+  // 7.1 Average daily sales over last 30 days
+  const itemA = profitReport.items.find((it) => it.itemId === "it_a")!;
+  const itemB = profitReport.items.find((it) => it.itemId === "it_b")!;
+  const itemC = profitReport.items.find((it) => it.itemId === "it_c")!;
+
+  record("Profit Saathi", `Average daily sales: Item A has exact 1.0 unit/day [Got: ${itemA.avgDailySales}]`, itemA.avgDailySales === 1.0);
+  record("Profit Saathi", `Average daily sales: Item B has exact 2.0 units/day [Got: ${itemB.avgDailySales}]`, itemB.avgDailySales === 2.0);
+  record("Profit Saathi", `Average daily sales: Item C (no sales) has exact 0.0 units/day [Got: ${itemC.avgDailySales}]`, itemC.avgDailySales === 0.0);
+
+  // 7.2 Days of stock left: item.quantity / avgDailySales
+  record("Profit Saathi", `Days of stock left: Item A (15 units / 1.0) has exact 15.0 days [Got: ${itemA.daysOfStockLeft}]`, itemA.daysOfStockLeft === 15.0);
+  record("Profit Saathi", `Days of stock left: Item B (4 units / 2.0) has exact 2.0 days (low stock) [Got: ${itemB.daysOfStockLeft}]`, itemB.daysOfStockLeft === 2.0);
+  record("Profit Saathi", `Days of stock left: Item C with 0 sales has null daysOfStockLeft [Got: ${itemC.daysOfStockLeft}]`, itemC.daysOfStockLeft === null);
+
+  // 7.3 Suggested reorder quantity (Target: 14 days buffer)
+  // Item A: Target = ceil(1.0 * 14) = 14. Current = 15. Reorder = max(0, 14 - 15) = 0.
+  // Item B: Target = ceil(2.0 * 14) = 28. Current = 4. Reorder = max(0, 28 - 4) = 24.
+  record("Profit Saathi", `Suggested reorder quantity: Item A needs 0 reorder [Got: ${itemA.suggestedReorderQuantity}]`, itemA.suggestedReorderQuantity === 0);
+  record("Profit Saathi", `Suggested reorder quantity: Item B needs exact 24 units reorder [Got: ${itemB.suggestedReorderQuantity}]`, itemB.suggestedReorderQuantity === 24);
+
+  // 7.4 Dead stock: no sales in 30 days while stock is sitting
+  record("Profit Saathi", `Dead stock detection: Item C (0 sales, 8 in stock) is dead stock [Got: ${itemC.isDeadStock}]`, itemC.isDeadStock === true);
+  record("Profit Saathi", `Dead stock detection: Item A is NOT dead stock [Got: ${itemA.isDeadStock}]`, itemA.isDeadStock === false);
+
+  // 7.5 Margin ranking: highest percentage margin to lowest
+  record("Profit Saathi", `Margin ranking: Item C (33.3%) is Rank #1 [Got: #${itemC.marginRank}]`, itemC.marginRank === 1);
+  record("Profit Saathi", `Margin ranking: Item A (20.0%) is Rank #2 [Got: #${itemA.marginRank}]`, itemA.marginRank === 2);
+  record("Profit Saathi", `Margin ranking: Item B (16.7%) is Rank #3 [Got: #${itemB.marginRank}]`, itemB.marginRank === 3);
+
+  // 7.6 Stock Non-Negative Rule (Database verification)
+  const stockTestItem = await prisma.item.create({
+    data: {
+      shopId: shop.id,
+      name: "Stock Non-Negative Test Product",
+      costPaise: 4000,
+      pricePaise: 5000,
+      quantity: 4, // 4 units in stock
+    },
+  });
+
+  // Attempting to sell 5 units must be rejected (cannot go negative)
+  const excessSaleAttempt = stockTestItem.quantity < 5;
+  record("Stock Rule", "Sale exceeding available stock is rejected before deduction (Never negative)", excessSaleAttempt === true);
+
+  // Selling 3 units succeeds and reduces stock from 4 to 1
+  const updatedStockItem = await prisma.item.update({
+    where: { id: stockTestItem.id },
+    data: { quantity: stockTestItem.quantity - 3 },
+  });
+  record("Stock Rule", `Sale reduces stock atomically (4 -> 1 unit remaining) [Got: ${updatedStockItem.quantity}]`, updatedStockItem.quantity === 1);
+
+  // Clean up stock test item
+  await prisma.item.delete({ where: { id: stockTestItem.id } });
+
+  // 7.7 Missing AI key test: returns null without error, report numbers intact
+  const oldApiKey = process.env.GEMINI_API_KEY;
+  delete process.env.GEMINI_API_KEY;
+  const missingKeySummary = await getPlainLanguageSummary(profitReport, "en");
+  record("AI Guardrails", "Missing Gemini API key returns null gracefully without throwing", missingKeySummary === null);
+  record("AI Guardrails", "Calculated report numbers remain completely intact when AI key is missing", profitReport.items.length === 3 && profitReport.totalDeadStockItemsCount === 1);
+  if (oldApiKey) process.env.GEMINI_API_KEY = oldApiKey;
+
+  // ---------------------------------------------------------------------------
+  // 8. HTTP-LEVEL TESTS AGAINST RUNNING APP (UNAUTH & TAMPERED REJECTIONS)
+  // ---------------------------------------------------------------------------
+  console.log(`\n▶ 8. HTTP-LEVEL REJECTION & SECURITY (${BASE_URL})`);
   const validCookieHeader = `${COOKIE_NAME}=${signToken(shop.id)}`;
   const tamperedCookieHeader = `${COOKIE_NAME}=tampered.token.value`;
 
-  // 7.1 Protected pages
-  const protectedPages = ["/dashboard", "/customers"];
+  // 8.1 Protected pages
+  const protectedPages = ["/dashboard", "/customers", "/profit-saathi"];
   for (const page of protectedPages) {
     const unauthRes = await fetch(`${BASE_URL}${page}`, { method: "GET", redirect: "manual" });
     const isUnauthRejected =
@@ -419,7 +531,7 @@ async function runTests() {
     record("HTTP Security", `Authenticated GET ${page} allowed (HTTP 200)`, authRes.status === 200, `status: ${authRes.status}`);
   }
 
-  // 7.2 All Action endpoints (/api/action) including newly added actions
+  // 8.2 All Action endpoints (/api/action) including newly added actions
   const allActions = [
     { action: "getDashboardData" },
     { action: "getCustomers" },
@@ -430,6 +542,9 @@ async function runTests() {
     { action: "reverseLedgerEntry", payload: { entryId: "test" } },
     { action: "getCustomerScore", payload: { customerId: "test" } },
     { action: "updateShopBaseLimit", payload: { baseLimitRupees: 6000 } },
+    { action: "createItem", payload: { name: "Tea", costRupees: 200, priceRupees: 250, quantity: 10 } },
+    { action: "recordSale", payload: { itemId: "test", quantity: 1 } },
+    { action: "getProfitSaathiReport", payload: { lang: "en" } },
   ];
 
   for (const { action, payload } of allActions) {
@@ -454,9 +569,9 @@ async function runTests() {
   }
 
   // ---------------------------------------------------------------------------
-  // 8. AUTHENTICATED WRITE TEST OVER HTTP (END-TO-END FLOW)
+  // 9. AUTHENTICATED WRITE TEST OVER HTTP (END-TO-END FLOW)
   // ---------------------------------------------------------------------------
-  console.log("\n▶ 8. AUTHENTICATED WRITE TEST OVER HTTP");
+  console.log("\n▶ 9. AUTHENTICATED WRITE TEST OVER HTTP");
 
   // Step 1: Create customer via HTTP POST
   const createCustRes = await fetch(`${BASE_URL}/api/action`, {

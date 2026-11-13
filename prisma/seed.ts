@@ -29,6 +29,8 @@ async function main() {
   }
 
   // Clear existing records for this shop to maintain clean idempotent seed
+  await prisma.sale.deleteMany({ where: { shopId: shop.id } });
+  await prisma.item.deleteMany({ where: { shopId: shop.id } });
   await prisma.ledgerEntry.deleteMany({
     where: { shopId: shop.id },
   });
@@ -170,8 +172,87 @@ async function main() {
     }
   }
 
+  // 3. Demo Inventory Items & Sales History (Part 3: Profit Saathi)
+  console.log("📦 Seeding inventory items and 30-day sales history...");
+
+  const demoItems = [
+    {
+      name: "Fortune Sunlite Sunflower Oil 1L",
+      costPaise: 11500, // ₹115
+      pricePaise: 14000, // ₹140 (17.9% margin)
+      quantity: 18,
+      category: "Cooking Oils",
+      salesCount: 15, // 15 units sold over last 30 days (0.5 units/day, 36 days stock)
+    },
+    {
+      name: "Aashirvaad Superior MP Atta 10kg",
+      costPaise: 38000, // ₹380
+      pricePaise: 44000, // ₹440 (13.6% margin)
+      quantity: 6,
+      category: "Flours & Grains",
+      salesCount: 18, // 18 units sold (0.6 units/day, 10 days stock left - Low Stock)
+    },
+    {
+      name: "Tata Tea Gold 500g",
+      costPaise: 26000, // ₹260
+      pricePaise: 32000, // ₹320 (18.8% margin)
+      quantity: 14,
+      category: "Beverages",
+      salesCount: 9, // 9 units sold (0.3 units/day, 46.7 days stock)
+    },
+    {
+      name: "Cadbury Celebrations Gift Box",
+      costPaise: 22000, // ₹220
+      pricePaise: 28000, // ₹280 (21.4% margin - Top Margin)
+      quantity: 12,
+      category: "Confectionery",
+      salesCount: 0, // 0 units sold in 30 days -> Dead Stock!
+    },
+    {
+      name: "Colgate Strong Teeth 200g",
+      costPaise: 9000, // ₹90
+      pricePaise: 12000, // ₹120 (25.0% margin)
+      quantity: 25,
+      category: "Personal Care",
+      salesCount: 20, // 20 units sold (0.67 units/day)
+    },
+  ];
+
+  for (const it of demoItems) {
+    const item = await prisma.item.create({
+      data: {
+        shopId: shop.id,
+        name: it.name,
+        costPaise: it.costPaise,
+        pricePaise: it.pricePaise,
+        quantity: it.quantity,
+        category: it.category,
+      },
+    });
+
+    // Create distributed sales over the last 30 days
+    if (it.salesCount > 0) {
+      for (let s = 1; s <= it.salesCount; s++) {
+        const daysAgo = Math.floor((s * 28) / it.salesCount);
+        const saleDate = new Date();
+        saleDate.setDate(saleDate.getDate() - daysAgo);
+
+        await prisma.sale.create({
+          data: {
+            shopId: shop.id,
+            itemId: item.id,
+            quantity: 1,
+            unitPricePaise: it.pricePaise,
+            totalPaise: it.pricePaise,
+            createdAt: saleDate,
+          },
+        });
+      }
+    }
+  }
+
   console.log("✅ Demo seed completed successfully!");
-  console.log(`Created 6 customers with realistic khata transactions.`);
+  console.log(`Created 6 customers and 5 inventory products with sales history.`);
   console.log(`UI labeled as: 'Demo data' on Shop: ${shop.name}`);
 }
 

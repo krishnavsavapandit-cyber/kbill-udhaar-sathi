@@ -10,6 +10,9 @@ import {
   reverseLedgerEntry,
   getCustomerScore,
   updateShopBaseLimit,
+  createItem,
+  recordSale,
+  getProfitSaathiReport,
 } from "@/app/actions";
 
 export async function POST(req: NextRequest) {
@@ -78,6 +81,30 @@ export async function POST(req: NextRequest) {
 
       case "updateShopBaseLimit": {
         const res = await updateShopBaseLimit(payload?.baseLimitRupees);
+        return NextResponse.json(res, { status: res.success ? 200 : 400 });
+      }
+
+      case "createItem": {
+        const res = await createItem({
+          name: payload?.name,
+          costRupees: payload?.costRupees,
+          priceRupees: payload?.priceRupees,
+          quantity: payload?.quantity,
+          category: payload?.category,
+        });
+        return NextResponse.json(res, { status: res.success ? 200 : 400 });
+      }
+
+      case "recordSale": {
+        const res = await recordSale({
+          itemId: payload?.itemId,
+          quantity: payload?.quantity,
+        });
+        return NextResponse.json(res, { status: res.success ? 200 : 400 });
+      }
+
+      case "getProfitSaathiReport": {
+        const res = await getProfitSaathiReport(payload?.lang);
         return NextResponse.json(res, { status: res.success ? 200 : 400 });
       }
 
