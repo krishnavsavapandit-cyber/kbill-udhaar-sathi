@@ -2,10 +2,11 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { BookOpen, KeyRound, Lock, Eye, EyeOff, ShieldCheck } from "lucide-react";
+import { KeyRound, Eye, EyeOff, ShieldCheck, Lock } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { loginAction } from "@/app/actions";
+import { ShopkeeperMascot } from "@/components/RationIcons";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -38,45 +39,49 @@ export default function LoginPage() {
     }
   };
 
-  const handleFillDemo = () => {
-    setPassword("kirana123");
-    setError(null);
-  };
-
   return (
-    <main className="min-h-screen bg-gradient-to-b from-emerald-800 via-emerald-700 to-slate-900 text-white flex flex-col justify-between p-4 sm:p-6">
+    <main className="min-h-screen bg-[#FAF7F0] flex flex-col justify-between p-4 sm:p-6 lg:p-8">
       {/* Top Header with Lang Toggle */}
-      <div className="flex justify-between items-center pt-2">
-        <div className="flex items-center gap-2">
-          <BookOpen className="w-6 h-6 text-amber-300" />
-          <span className="font-black text-lg tracking-tight">{t.appName}</span>
+      <header className="max-w-6xl mx-auto w-full flex justify-between items-center py-2">
+        <div className="flex items-center gap-2.5">
+          <div className="w-10 h-10 rounded-2xl bg-amber-200 border border-amber-400 p-1 flex items-center justify-center shadow-inner">
+            <ShopkeeperMascot className="w-8 h-8" />
+          </div>
+          <div>
+            <span className="font-black text-lg tracking-tight text-slate-900 leading-none">
+              {t.appName}
+            </span>
+            <span className="block text-[11px] font-bold text-amber-800">
+              डिजिटल बही-खाता
+            </span>
+          </div>
         </div>
         <LanguageToggle />
-      </div>
+      </header>
 
-      {/* Main Login Card */}
-      <div className="w-full my-auto py-8">
-        <div className="bg-white text-slate-900 rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-100">
+      {/* Main Login Card Centered */}
+      <div className="w-full max-w-md mx-auto my-auto py-8">
+        <div className="bg-white text-slate-900 rounded-3xl p-6 sm:p-8 shadow-xl border-2 border-amber-900/10">
           <div className="text-center mb-6">
-            <div className="w-16 h-16 bg-emerald-100 text-emerald-800 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-inner">
-              <Lock className="w-8 h-8" />
+            <div className="w-20 h-20 bg-amber-100 rounded-3xl flex items-center justify-center mx-auto mb-3 border-2 border-amber-300 shadow-inner">
+              <ShopkeeperMascot className="w-16 h-16" />
             </div>
             <h2 className="text-2xl font-black tracking-tight text-slate-900">
               {t.loginTitle}
             </h2>
-            <p className="text-sm text-slate-500 mt-1">
+            <p className="text-xs text-slate-500 font-semibold mt-1">
               {t.loginSubtitle}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-2">
                 {t.passwordLabel}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <KeyRound className="w-5 h-5" />
+                  <KeyRound className="w-5 h-5 text-amber-700" />
                 </div>
                 <input
                   type={showPassword ? "text" : "password"}
@@ -85,20 +90,20 @@ export default function LoginPage() {
                   placeholder={t.passwordPlaceholder}
                   required
                   autoFocus
-                  className="w-full pl-11 pr-11 py-3.5 rounded-2xl border border-slate-300 bg-slate-50 text-slate-900 text-lg font-medium tracking-wide focus:bg-white focus:border-emerald-600 focus:ring-4 focus:ring-emerald-100 outline-none transition-all placeholder:text-slate-400"
+                  className="w-full pl-11 pr-11 py-3.5 rounded-2xl border-2 border-slate-200 bg-[#FAF7F0] text-slate-900 text-lg font-bold tracking-wide focus:bg-white focus:border-emerald-600 focus:ring-4 focus:ring-emerald-100 outline-none transition-all placeholder:text-slate-400"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5 text-slate-600" />}
                 </button>
               </div>
             </div>
 
             {error && (
-              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm font-semibold text-center animate-shake">
+              <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold text-center">
                 {error}
               </div>
             )}
@@ -106,32 +111,20 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading || !password}
-              className="w-full py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 disabled:opacity-50 text-white font-extrabold text-lg shadow-lg shadow-emerald-700/30 active:scale-[0.99] transition-all flex items-center justify-center gap-2"
+              className="w-full py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 disabled:opacity-50 text-white font-black text-base shadow-lg shadow-emerald-700/25 active:scale-[0.99] transition-all flex items-center justify-center gap-2 border border-emerald-700"
             >
               {isLoading ? (
                 <span className="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
               ) : (
                 <>
-                  <BookOpen className="w-5 h-5" />
+                  <Lock className="w-4 h-4" />
                   <span>{t.loginButton}</span>
                 </>
               )}
             </button>
-
-            {/* Quick Demo Fill Helper */}
-            <div className="pt-2">
-              <button
-                type="button"
-                onClick={handleFillDemo}
-                className="w-full py-2.5 px-3 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 text-xs font-bold text-center transition-colors flex items-center justify-center gap-1.5"
-              >
-                <span>🔑</span>
-                <span>{t.useDemoPassword}</span>
-              </button>
-            </div>
           </form>
 
-          <div className="mt-6 pt-5 border-t border-slate-100 flex items-center justify-center gap-2 text-xs text-slate-500 font-medium">
+          <div className="mt-6 pt-5 border-t border-amber-900/10 flex items-center justify-center gap-2 text-xs text-slate-500 font-semibold">
             <ShieldCheck className="w-4 h-4 text-emerald-600" />
             <span>Single-shopkeeper secured ledger (.env)</span>
           </div>
@@ -139,7 +132,7 @@ export default function LoginPage() {
       </div>
 
       {/* Footer */}
-      <footer className="text-center py-2 text-xs text-emerald-200/80 font-medium">
+      <footer className="text-center py-3 text-xs text-slate-500 font-semibold max-w-6xl mx-auto w-full">
         {t.tagline} • Udhaar Saathi v1.0
       </footer>
     </main>

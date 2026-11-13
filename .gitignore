@@ -6,30 +6,35 @@
 .pnp.js
 .yarn/install-state.gz
 
-# testing
+# testing & keploy recordings with real data
 /coverage
+keploy/
+.keploy/
+*.keploy
 
 # next.js
 /.next/
 /out/
 
-# production
+# production build
 /build
 
 # misc
 .DS_Store
 *.pem
 
-# debug
+# debug logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# local env files
+# local env files (never commit real credentials)
 .env*.local
 .env
+.env.production
+.env.staging
 
-# SQLite
+# SQLite databases & journals
 *.db
 *.db-journal
 *.db-shm

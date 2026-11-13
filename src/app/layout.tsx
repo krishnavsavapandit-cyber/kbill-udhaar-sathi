@@ -3,8 +3,8 @@ import { LanguageProvider } from "@/context/LanguageContext";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Udhaar Saathi | Digital Khata for Local Shopkeepers",
-  description: "A fast, simple, mobile-first credit notebook (udhaar khata) for small shopkeepers in India.",
+  title: "Udhaar Saathi | Digital Khata & Profit Assistant for Local Kirana",
+  description: "A fast, friendly, mobile-first and desktop-ready credit notebook (udhaar khata) for small shopkeepers in India.",
   manifest: "/manifest.json",
 };
 
@@ -23,9 +23,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col font-sans selection:bg-emerald-100 selection:text-emerald-900">
+      <body className="bg-[#FAF7F0] text-slate-900 antialiased min-h-screen flex flex-col selection:bg-amber-200 selection:text-amber-950">
         <LanguageProvider>
-          <div className="flex-1 max-w-md mx-auto w-full bg-white shadow-xl min-h-screen flex flex-col border-x border-slate-200/80">
+          <div className="flex-1 w-full min-h-screen flex flex-col">
             {children}
           </div>
         </LanguageProvider>
