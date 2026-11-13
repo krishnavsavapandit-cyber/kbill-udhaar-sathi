@@ -1,0 +1,51 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Shop {
+  id        String        @id @default(cuid())
+  name      String        @default("Gupta Kirana & General Store")
+  ownerName String        @default("Ramesh Gupta")
+  phone     String?
+  isDemo    Boolean       @default(false)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  customers Customer[]
+  entries   LedgerEntry[]
+}
+
+model Customer {
+  id        String        @id @default(cuid())
+  shopId    String
+  name      String
+  phone     String
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  shop      Shop          @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  entries   LedgerEntry[]
+
+  @@index([shopId])
+}
+
+model LedgerEntry {
+  id          String   @id @default(cuid())
+  shopId      String
+  customerId  String
+  type        String   // "CREDIT_GIVEN" | "PAYMENT_RECEIVED"
+  amountPaise Int      // stored in paise (1 INR = 100 paise)
+  note        String?
+  createdAt   DateTime @default(now())
+  shop        Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([shopId])
+  @@index([customerId])
+}
