@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-async function main() {
+export async function seedDemoData() {
   console.log("🌱 Seeding realistic demo data for Udhaar Saathi...");
 
   // 1. Find or create the primary demo shop
@@ -256,11 +256,14 @@ async function main() {
   console.log(`UI labeled as: 'Demo data' on Shop: ${shop.name}`);
 }
 
-main()
-  .catch((e) => {
-    console.error("❌ Error seeding demo data:", e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+const isDirectRun = process.argv[1] && /(^|[/\\])seed\.(ts|js)$/.test(process.argv[1]);
+if (isDirectRun) {
+  seedDemoData()
+    .catch((e) => {
+      console.error("❌ Error seeding demo data:", e);
+      process.exit(1);
+    })
+    .finally(async () => {
+      await prisma.$disconnect();
+    });
+}
