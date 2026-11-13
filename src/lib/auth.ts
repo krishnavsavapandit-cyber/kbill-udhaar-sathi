@@ -2,8 +2,15 @@ import { cookies } from "next/headers";
 import crypto from "crypto";
 import { prisma } from "./prisma";
 
-const COOKIE_NAME = "udhaar_session";
+export const COOKIE_NAME = "udhaar_session";
 const SECRET = process.env.SESSION_SECRET || "udhaar-saathi-secure-session-key-2026-minimum-32-chars";
+
+export class UnauthorizedError extends Error {
+  constructor(message: string = "UNAUTHORIZED") {
+    super(message);
+    this.name = "UnauthorizedError";
+  }
+}
 
 export function signToken(shopId: string): string {
   const hmac = crypto.createHmac("sha256", SECRET);
@@ -67,6 +74,18 @@ export async function getCurrentShop() {
   } catch {
     return null;
   }
+}
+
+/**
+ * Shared helper used across all actions, routes, and data loaders.
+ * Fails closed by throwing UnauthorizedError if session is missing, invalid, or tampered.
+ */
+export async function requireShop() {
+  const shop = await getCurrentShop();
+  if (!shop) {
+    throw new UnauthorizedError("Authentication required: No valid shopkeeper session found");
+  }
+  return shop;
 }
 
 export async function setSessionCookie(shopId: string) {

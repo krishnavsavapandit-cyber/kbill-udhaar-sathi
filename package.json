@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "seed:demo": "tsx prisma/seed.ts",
-    "test:e2e": "tsx scripts/test-e2e.ts"
+    "test": "tsx scripts/test-app.ts"
   },
   "dependencies": {
     "@prisma/client": "5.22.0",

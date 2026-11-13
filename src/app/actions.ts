@@ -6,9 +6,10 @@ import { prisma } from "@/lib/prisma";
 import {
   checkPassword,
   clearSessionCookie,
-  getCurrentShop,
   getOrCreateDefaultShop,
+  requireShop,
   setSessionCookie,
+  UnauthorizedError,
 } from "@/lib/auth";
 import { customerSchema, ledgerEntrySchema } from "@/lib/validations";
 import { rupeesToPaise } from "@/lib/money";
@@ -38,18 +39,6 @@ export async function loginAction(formData: FormData): Promise<ActionResult> {
 export async function logoutAction() {
   await clearSessionCookie();
   redirect("/login");
-}
-
-// -----------------------------------------------------------------------------
-// Helper: require authenticated shop
-// -----------------------------------------------------------------------------
-
-async function requireShop() {
-  const shop = await getCurrentShop();
-  if (!shop) {
-    throw new Error("UNAUTHORIZED");
-  }
-  return shop;
 }
 
 // -----------------------------------------------------------------------------
@@ -190,6 +179,9 @@ export async function createCustomer(formData: FormData): Promise<ActionResult<{
     revalidatePath("/dashboard");
     return { success: true, data: { customerId: customer.id } };
   } catch (err: unknown) {
+    if (err instanceof UnauthorizedError) {
+      return { success: false, error: "UNAUTHORIZED" };
+    }
     const message = err instanceof Error ? err.message : "Failed to create customer";
     return { success: false, error: message };
   }
@@ -247,6 +239,9 @@ export async function updateCustomer(
     revalidatePath("/dashboard");
     return { success: true };
   } catch (err: unknown) {
+    if (err instanceof UnauthorizedError) {
+      return { success: false, error: "UNAUTHORIZED" };
+    }
     const message = err instanceof Error ? err.message : "Failed to update customer";
     return { success: false, error: message };
   }
@@ -334,6 +329,9 @@ export async function addLedgerEntry(data: {
     revalidatePath("/dashboard");
     return { success: true };
   } catch (err: unknown) {
+    if (err instanceof UnauthorizedError) {
+      return { success: false, error: "UNAUTHORIZED" };
+    }
     const message = err instanceof Error ? err.message : "Failed to add ledger entry";
     return { success: false, error: message };
   }
@@ -391,6 +389,9 @@ export async function reverseLedgerEntry(entryId: string): Promise<ActionResult>
     revalidatePath("/dashboard");
     return { success: true };
   } catch (err: unknown) {
+    if (err instanceof UnauthorizedError) {
+      return { success: false, error: "UNAUTHORIZED" };
+    }
     const message = err instanceof Error ? err.message : "Failed to reverse entry";
     return { success: false, error: message };
   }

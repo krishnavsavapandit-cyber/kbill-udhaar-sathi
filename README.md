@@ -1,7 +1,7 @@
 # 📖 Udhaar Saathi (उधार साथी / ধাৰ সাৰথী)
 > **Mobile-First Digital Khata for Local Kirana & Retail Shopkeepers in India**
 
-Udhaar Saathi replaces the vulnerable paper credit notebook (*bahi-khata*) of Indian small shopkeepers with a clean, fast, mobile-first web app that can be operated in under 30 seconds with one thumb.
+Udhaar Saathi replaces the vulnerable paper credit notebook (*bahi-khata*) of Indian small shopkeepers with a focused, mobile-first web app that can be operated quickly with one thumb.
 
 ---
 
@@ -10,13 +10,13 @@ Small neighbourhood kirana store owners, vegetable vendors, and local retail sho
 - **Pages tear, smudge, or get lost**: Spills, rain, or worn-out binding destroy historical records.
 - **Manual calculation mistakes**: Mental addition and subtraction errors lead to losses or disputes with customers.
 - **Awkward payment collection**: Shopkeepers hesitate to verbally confront neighbours about overdue balances.
-- **Overcomplicated software**: Most SaaS accounting apps require complex registrations, GST numbers, inventory setups, and endless nested menus.
+- **Overcomplicated software**: Most generic accounting apps require complex registrations, GST numbers, inventory setups, and endless nested menus.
 
 ---
 
 ## 💡 The Solution
-**Udhaar Saathi** provides a stripped-down, focused, tactile khata designed strictly for speed and simplicity:
-1. **Single Shopkeeper Login**: No signup friction. Protected by a single shop password in `.env`.
+**Udhaar Saathi** provides a stripped-down, tactile khata designed strictly for speed and simplicity:
+1. **Single Shopkeeper Login**: No signup friction. Protected by a shop password configured in `.env`.
 2. **Instant Customer Management**: Add, edit, and search customers by name or 10-digit Indian mobile number in real time.
 3. **Append-Only Ledger**:
    - 🔴 **Udhaar Diya (+ Credit Given)**
@@ -26,7 +26,7 @@ Small neighbourhood kirana store owners, vegetable vendors, and local retail sho
    - Append-only corrections: mistakes are corrected via an offsetting reversal entry, preserving an audit trail.
 4. **Negative Balance Safeguard**: A confirmation modal prevents recording a payment that exceeds the current due balance unless the shopkeeper deliberately confirms recording an advance.
 5. **Dashboard Overview**: Total shop outstanding amount, count of customers with pending dues, top 5 debtors, and a recent transaction feed.
-6. **1-Tap WhatsApp Reminder**: Generates a polite, respectful `wa.me` message in the customer's language without requiring costly WhatsApp Business APIs.
+6. **1-Tap WhatsApp Reminder**: Generates a polite, respectful `wa.me` message in the customer's language without requiring WhatsApp Business APIs.
 7. **Trilingual Toggle**: English, Hindi (हिंदी), and Assamese (অসমীয়া) from a single translation dictionary.
 8. **Demo Data Transparency**: Loaded exclusively via `npm run seed:demo`, with a visible "Demo Data" banner in the UI.
 
@@ -62,29 +62,29 @@ npm install
 # Initialize SQLite database
 npx prisma db push
 
-# Seed realistic demo data (sets isDemo = true and creates 6 realistic customers)
+# Seed demo data (sets isDemo = true and creates 6 realistic customers)
 npm run seed:demo
 ```
 
 ### 3. Start the Application
 ```bash
-# Development mode
-npm run dev
-
-# Or production build & start
+# Build the application
 npm run build
+
+# Start the application
 npm run start -p 3005
+# (or 'npm run dev' for development)
 ```
-Open **`http://localhost:3005`** (or port `3000` if available) on your browser or mobile phone emulator.
+Open **`http://localhost:3005`** (or port `3000` if available) on your browser or mobile phone view.
 
 ### 4. Login Credentials
-- **Password**: `kirana123` (configured in `.env` as `SHOP_PASSWORD`)
-- Click **"Use Default (kirana123)"** on the login screen for 1-tap testing.
+- Password is set in your `.env` file under `SHOP_PASSWORD`.
+- In demo/development environments, a pre-fill button is available on the login screen for testing convenience.
 
-### 5. Automated E2E Verification Suite
-Run the 24-point automated test suite:
+### 5. Integration & HTTP Security Test Suite
+Run the automated test suite covering security, calculations, validations, reversal audit trails, excess-payment rules, and live HTTP endpoint rejections:
 ```bash
-npm run test:e2e
+npm test
 ```
 
 ---
@@ -97,28 +97,28 @@ npm run test:e2e
 
 ---
 
-## ⏱️ 60-Second Evaluator Demo Script
+## ⏱️ Walkthrough Demo Script
 
 Follow these steps to test the entire flow end-to-end:
 
-1. **Sign In (0:00 - 0:10)**:
+1. **Sign In**:
    - Visit `http://localhost:3005`. You are redirected to `/login`.
    - Toggle language to **हिंदी** or **অসমীয়া** at the top right.
-   - Click the amber button **"Use Default (kirana123)"** and tap **"Open Khata"**.
-2. **Dashboard Overview (0:10 - 0:25)**:
+   - Enter your shop password and tap **"Open Khata"**.
+2. **Dashboard Overview**:
    - Observe the **"Demo Data Loaded"** top banner.
    - Notice the **Total Udhaar (Outstanding)** card (`₹6,120`), **Customers with Dues** (`4`), and **Top Customers by Balance Owed**.
-3. **Customer Search & Add (0:25 - 0:35)**:
+3. **Customer Search & Add**:
    - Tap **"Customers"** on the bottom nav.
    - Type `"Sunita"` or `"9876"` in the search bar to filter instantly.
    - Clear search and tap **"+ Add Customer"**. Enter Name: `Manoj Sharma`, Phone: `9822334455`. Tap **Save**.
-4. **Record Credit & Payment (0:35 - 0:50)**:
+4. **Record Credit & Payment**:
    - Open `Manoj Sharma`'s profile.
    - Tap 🔴 **"Udhaar Diya"**, enter `₹450`, note: `Mustard Oil & Biscuits`. Tap **Save to Khata**.
    - Notice balance increases to `₹450`.
    - Tap 🟢 **"Jama Kiya"**, enter `₹500` (exceeds balance).
    - Notice the **Excess Payment Warning** confirmation modal appears! Tap **"Yes, Record Advance"**.
    - Balance updates to `-₹50` (Advance).
-5. **Append-Only Reversal & WhatsApp Reminder (0:50 - 1:00)**:
+5. **Append-Only Reversal & WhatsApp Reminder**:
    - On any earlier transaction in the history, tap **"Reversal Entry"** and confirm. An offsetting entry is appended, never deleting past rows.
    - Go to `Sunita Sharma` (balance `₹1,450`), tap **"Remind on WhatsApp"**. Verify it generates `https://wa.me/919876543210?text=...` with the polite reminder message.
