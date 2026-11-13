@@ -1,0 +1,16 @@
+{
+  "name": "Udhaar Saathi - Digital Khata",
+  "short_name": "UdhaarSaathi",
+  "description": "Digital Khata & Daily Profit Assistant for Local Kirana Shopkeepers",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAF7F0",
+  "theme_color": "#065F46",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}
