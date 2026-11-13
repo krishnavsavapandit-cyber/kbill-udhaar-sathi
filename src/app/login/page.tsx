@@ -132,6 +132,33 @@ export default function LoginPage() {
                 </>
               )}
             </button>
+
+            {/* Demo Password 1-Click Autofill Helper */}
+            <div className="pt-2">
+              <div className="p-3.5 bg-amber-50/90 border-2 border-amber-300 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-2.5 shadow-sm">
+                <div className="text-left w-full sm:w-auto">
+                  <div className="text-[11px] font-bold text-amber-900 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                    <span>{t.demoPasswordHint}</span>
+                  </div>
+                  <div className="mt-1 flex items-center gap-1.5">
+                    <span className="text-[11px] font-semibold text-slate-500">Demo Password:</span>
+                    <code className="px-2 py-0.5 bg-amber-200 text-amber-950 font-mono font-black text-xs rounded-lg select-all border border-amber-300">
+                      kirana123
+                    </code>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setPassword("kirana123")}
+                  className="w-full sm:w-auto text-xs font-black text-amber-950 bg-amber-400 hover:bg-amber-300 active:bg-amber-500 px-3.5 py-2 rounded-xl border border-amber-500 shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1.5 flex-shrink-0"
+                >
+                  <KeyRound className="w-3.5 h-3.5 text-amber-950" />
+                  <span>{t.useDemoPassword}</span>
+                </button>
+              </div>
+            </div>
           </form>
 
           <div className="mt-6 pt-5 border-t border-amber-900/10 flex items-center justify-center gap-2 text-xs text-slate-500 font-semibold">
