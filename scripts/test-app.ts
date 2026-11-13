@@ -665,117 +665,126 @@ async function runTests() {
   // ---------------------------------------------------------------------------
   console.log("\n▶ 9. AUTHENTICATED WRITE TEST OVER HTTP");
 
-  // Step 1: Create customer via HTTP POST
-  const createCustRes = await fetch(`${BASE_URL}/api/action`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Cookie: validCookieHeader,
-    },
-    body: JSON.stringify({
-      action: "createCustomer",
-      payload: { name: "HTTP End-To-End Customer", phone: "9871122334" },
-    }),
-  });
-  const createCustJson = await createCustRes.json();
-  const httpCustomerId = createCustJson.data?.customerId;
-  record(
-    "HTTP Write Flow",
-    "Step 1: Create customer over HTTP returns 200 with customerId",
-    createCustRes.status === 200 && !!httpCustomerId
-  );
-
-  // Step 2: Add credit of ₹600 via HTTP POST
-  const addCreditRes = await fetch(`${BASE_URL}/api/action`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Cookie: validCookieHeader,
-    },
-    body: JSON.stringify({
-      action: "addLedgerEntry",
-      payload: {
-        customerId: httpCustomerId,
-        type: "CREDIT_GIVEN",
-        amountRupees: 600,
-        note: "Grocery credit over HTTP",
+  let httpCustomerId: string | undefined;
+  try {
+    // Step 1: Create customer via HTTP POST
+    const createCustRes = await fetch(`${BASE_URL}/api/action`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: validCookieHeader,
       },
-    }),
-  });
-  const addCreditJson = await addCreditRes.json();
-  record(
-    "HTTP Write Flow",
-    "Step 2: Add credit (₹600) over HTTP returns 200",
-    addCreditRes.status === 200 && addCreditJson.success === true
-  );
+      body: JSON.stringify({
+        action: "createCustomer",
+        payload: { name: "HTTP End-To-End Customer", phone: "9871122334" },
+      }),
+    });
+    const createCustJson = await createCustRes.json();
+    httpCustomerId = createCustJson.data?.customerId;
+    record(
+      "HTTP Write Flow",
+      "Step 1: Create customer over HTTP returns 200 with customerId",
+      createCustRes.status === 200 && !!httpCustomerId
+    );
 
-  // Step 3: Add payment of ₹250 via HTTP POST
-  const addPaymentRes = await fetch(`${BASE_URL}/api/action`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Cookie: validCookieHeader,
-    },
-    body: JSON.stringify({
-      action: "addLedgerEntry",
-      payload: {
-        customerId: httpCustomerId,
-        type: "PAYMENT_RECEIVED",
-        amountRupees: 250,
-        note: "Partial payment via Cash over HTTP",
+    // Step 2: Add credit of ₹600 via HTTP POST
+    const addCreditRes = await fetch(`${BASE_URL}/api/action`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: validCookieHeader,
       },
-    }),
-  });
-  const addPaymentJson = await addPaymentRes.json();
-  record(
-    "HTTP Write Flow",
-    "Step 3: Add payment (₹250) over HTTP returns 200",
-    addPaymentRes.status === 200 && addPaymentJson.success === true
-  );
+      body: JSON.stringify({
+        action: "addLedgerEntry",
+        payload: {
+          customerId: httpCustomerId,
+          type: "CREDIT_GIVEN",
+          amountRupees: 600,
+          note: "Grocery credit over HTTP",
+        },
+      }),
+    });
+    const addCreditJson = await addCreditRes.json();
+    record(
+      "HTTP Write Flow",
+      "Step 2: Add credit (₹600) over HTTP returns 200",
+      addCreditRes.status === 200 && addCreditJson.success === true
+    );
 
-  // Step 4: Check customer ledger & balance over HTTP GET/POST
-  const getCustRes = await fetch(`${BASE_URL}/api/action`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Cookie: validCookieHeader,
-    },
-    body: JSON.stringify({
-      action: "getCustomer",
-      payload: { id: httpCustomerId },
-    }),
-  });
-  const getCustJson = await getCustRes.json();
-  const customerBalancePaise = getCustJson.data?.balancePaise;
-  // Expected balance: ₹600 - ₹250 = ₹350 (35000 paise)
-  record(
-    "HTTP Write Flow",
-    `Step 4: Check balance over HTTP matches exact ₹350 (35000 paise) [Got: ${customerBalancePaise}]`,
-    getCustRes.status === 200 && customerBalancePaise === 35000
-  );
+    // Step 3: Add payment of ₹250 via HTTP POST
+    const addPaymentRes = await fetch(`${BASE_URL}/api/action`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: validCookieHeader,
+      },
+      body: JSON.stringify({
+        action: "addLedgerEntry",
+        payload: {
+          customerId: httpCustomerId,
+          type: "PAYMENT_RECEIVED",
+          amountRupees: 250,
+          note: "Partial payment via Cash over HTTP",
+        },
+      }),
+    });
+    const addPaymentJson = await addPaymentRes.json();
+    record(
+      "HTTP Write Flow",
+      "Step 3: Add payment (₹250) over HTTP returns 200",
+      addPaymentRes.status === 200 && addPaymentJson.success === true
+    );
 
-  // Step 5: Verify customer score over HTTP
-  const getScoreRes = await fetch(`${BASE_URL}/api/action`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Cookie: validCookieHeader,
-    },
-    body: JSON.stringify({
-      action: "getCustomerScore",
-      payload: { customerId: httpCustomerId },
-    }),
-  });
-  const getScoreJson = await getScoreRes.json();
-  record(
-    "HTTP Write Flow",
-    "Step 5: Get customer Udhaar score over HTTP returns 200 with score & band",
-    getScoreRes.status === 200 && typeof getScoreJson.data?.score === "number" && !!getScoreJson.data?.band
-  );
+    // Step 4: Check customer ledger & balance over HTTP GET/POST
+    const getCustRes = await fetch(`${BASE_URL}/api/action`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: validCookieHeader,
+      },
+      body: JSON.stringify({
+        action: "getCustomer",
+        payload: { id: httpCustomerId },
+      }),
+    });
+    const getCustJson = await getCustRes.json();
+    const customerBalancePaise = getCustJson.data?.balancePaise;
+    // Expected balance: ₹600 - ₹250 = ₹350 (35000 paise)
+    record(
+      "HTTP Write Flow",
+      `Step 4: Check balance over HTTP matches exact ₹350 (35000 paise) [Got: ${customerBalancePaise}]`,
+      getCustRes.status === 200 && customerBalancePaise === 35000
+    );
 
-  // Clean up HTTP test customer
-  await prisma.ledgerEntry.deleteMany({ where: { customerId: httpCustomerId } });
-  await prisma.customer.delete({ where: { id: httpCustomerId } });
+    // Step 5: Verify customer score over HTTP
+    const getScoreRes = await fetch(`${BASE_URL}/api/action`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: validCookieHeader,
+      },
+      body: JSON.stringify({
+        action: "getCustomerScore",
+        payload: { customerId: httpCustomerId },
+      }),
+    });
+    const getScoreJson = await getScoreRes.json();
+    record(
+      "HTTP Write Flow",
+      "Step 5: Get customer Udhaar score over HTTP returns 200 with score & band",
+      getScoreRes.status === 200 && typeof getScoreJson.data?.score === "number" && !!getScoreJson.data?.band
+    );
+  } finally {
+    // Clean up HTTP test customer and ensure test data hygiene
+    if (httpCustomerId) {
+      await prisma.ledgerEntry.deleteMany({ where: { customerId: httpCustomerId } });
+      await prisma.customer.delete({ where: { id: httpCustomerId } }).catch(() => {});
+    }
+    // Delete any stray test customers with test phone
+    await prisma.customer.deleteMany({
+      where: { phone: "9871122334" },
+    });
+  }
 
   // ---------------------------------------------------------------------------
   // SUMMARY
