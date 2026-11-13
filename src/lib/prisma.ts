@@ -4,14 +4,17 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
+const rawDbUrl = process.env.DATABASE_URL?.replace(/^["']|["']$/g, "").trim();
+const dbUrl = rawDbUrl?.includes("connection_limit")
+  ? rawDbUrl
+  : `${rawDbUrl || "file:./dev.db"}?connection_limit=1`;
+
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
     datasources: {
       db: {
-        url: process.env.DATABASE_URL?.includes("connection_limit")
-          ? process.env.DATABASE_URL
-          : `${process.env.DATABASE_URL || "file:./dev.db"}?connection_limit=1`,
+        url: dbUrl,
       },
     },
     log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],

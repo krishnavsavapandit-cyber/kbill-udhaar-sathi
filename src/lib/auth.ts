@@ -3,7 +3,16 @@ import crypto from "crypto";
 import { prisma } from "./prisma";
 
 export const COOKIE_NAME = "udhaar_session";
-const SECRET = process.env.SESSION_SECRET || "udhaar-saathi-secure-session-key-2026-minimum-32-chars";
+
+function cleanEnv(val: string | undefined, defaultVal: string): string {
+  if (!val) return defaultVal;
+  return val.replace(/^["']|["']$/g, "").trim();
+}
+
+const SECRET = cleanEnv(
+  process.env.SESSION_SECRET,
+  "udhaar-saathi-secure-session-key-2026-minimum-32-chars"
+);
 
 export class UnauthorizedError extends Error {
   constructor(message: string = "UNAUTHORIZED") {
@@ -104,6 +113,6 @@ export async function clearSessionCookie() {
 }
 
 export function checkPassword(passwordAttempt: string): boolean {
-  const expected = process.env.SHOP_PASSWORD || "kirana123";
-  return passwordAttempt === expected;
+  const expected = cleanEnv(process.env.SHOP_PASSWORD, "kirana123");
+  return passwordAttempt.trim() === expected;
 }
