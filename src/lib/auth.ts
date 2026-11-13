@@ -21,7 +21,11 @@ export function verifyToken(token: string): string | null {
   hmac.update(shopId);
   const expectedSig = hmac.digest("hex");
 
-  if (crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expectedSig))) {
+  const sigBuffer = Buffer.from(sig);
+  const expectedSigBuffer = Buffer.from(expectedSig);
+  if (sigBuffer.length !== expectedSigBuffer.length) return null;
+
+  if (crypto.timingSafeEqual(sigBuffer, expectedSigBuffer)) {
     return shopId;
   }
   return null;

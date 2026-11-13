@@ -1,36 +1,124 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📖 Udhaar Saathi (उधार साथी / ধাৰ সাৰথী)
+> **Mobile-First Digital Khata for Local Kirana & Retail Shopkeepers in India**
 
-## Getting Started
+Udhaar Saathi replaces the vulnerable paper credit notebook (*bahi-khata*) of Indian small shopkeepers with a clean, fast, mobile-first web app that can be operated in under 30 seconds with one thumb.
 
-First, run the development server:
+---
 
+## 🎯 The Problem
+Small neighbourhood kirana store owners, vegetable vendors, and local retail shops in India extend credit (*udhaar*) to regular customers every single day. Traditional paper credit registers suffer from critical daily issues:
+- **Pages tear, smudge, or get lost**: Spills, rain, or worn-out binding destroy historical records.
+- **Manual calculation mistakes**: Mental addition and subtraction errors lead to losses or disputes with customers.
+- **Awkward payment collection**: Shopkeepers hesitate to verbally confront neighbours about overdue balances.
+- **Overcomplicated software**: Most SaaS accounting apps require complex registrations, GST numbers, inventory setups, and endless nested menus.
+
+---
+
+## 💡 The Solution
+**Udhaar Saathi** provides a stripped-down, focused, tactile khata designed strictly for speed and simplicity:
+1. **Single Shopkeeper Login**: No signup friction. Protected by a single shop password in `.env`.
+2. **Instant Customer Management**: Add, edit, and search customers by name or 10-digit Indian mobile number in real time.
+3. **Append-Only Ledger**:
+   - 🔴 **Udhaar Diya (+ Credit Given)**
+   - 🟢 **Jama Kiya (- Payment Received)**
+   - Stored in **integer paise** (eliminating floating-point errors).
+   - Balance is computed on the server (`credits - payments`).
+   - Append-only corrections: mistakes are corrected via an offsetting reversal entry, preserving an audit trail.
+4. **Negative Balance Safeguard**: A confirmation modal prevents recording a payment that exceeds the current due balance unless the shopkeeper deliberately confirms recording an advance.
+5. **Dashboard Overview**: Total shop outstanding amount, count of customers with pending dues, top 5 debtors, and a recent transaction feed.
+6. **1-Tap WhatsApp Reminder**: Generates a polite, respectful `wa.me` message in the customer's language without requiring costly WhatsApp Business APIs.
+7. **Trilingual Toggle**: English, Hindi (हिंदी), and Assamese (অসমীয়া) from a single translation dictionary.
+8. **Demo Data Transparency**: Loaded exclusively via `npm run seed:demo`, with a visible "Demo Data" banner in the UI.
+
+---
+
+## 🛠️ Tech Stack
+- **Framework**: Next.js 14 (App Router, Server Actions)
+- **Language**: TypeScript (Strict mode)
+- **Database**: SQLite (via Prisma ORM)
+- **Styling**: Tailwind CSS (Mobile-first viewport, thumb-accessible layout)
+- **Validation**: Zod (Strict 10-digit phone regex, positive non-zero amounts)
+- **Icons**: Lucide React
+
+---
+
+## 🚀 Quickstart & How to Run
+
+### 1. Prerequisites
+- Node.js 18+ (tested on Node v24 LTS)
+- npm or pnpm
+
+### 2. Setup
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Clone or navigate to the project directory
+cd udhaar-saathi
+
+# Copy environment variables
+cp .env.example .env
+
+# Install dependencies
+npm install
+
+# Initialize SQLite database
+npx prisma db push
+
+# Seed realistic demo data (sets isDemo = true and creates 6 realistic customers)
+npm run seed:demo
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Start the Application
+```bash
+# Development mode
+npm run dev
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+# Or production build & start
+npm run build
+npm run start -p 3005
+```
+Open **`http://localhost:3005`** (or port `3000` if available) on your browser or mobile phone emulator.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 4. Login Credentials
+- **Password**: `kirana123` (configured in `.env` as `SHOP_PASSWORD`)
+- Click **"Use Default (kirana123)"** on the login screen for 1-tap testing.
 
-## Learn More
+### 5. Automated E2E Verification Suite
+Run the 24-point automated test suite:
+```bash
+npm run test:e2e
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🔍 Honest Limitations (No Fake Claims)
+- **Single-Shopkeeper Scope**: This app is architected for a single shopkeeper with one master password. It is not a multi-tenant B2B SaaS platform.
+- **WhatsApp Web Intent**: The "Remind on WhatsApp" button opens native WhatsApp via `wa.me` with a pre-filled message. It does **not** send automated background messages via the WhatsApp Cloud API.
+- **SQLite Local File Storage**: Data is saved to local `dev.db`. For distributed multi-device access across different physical stores, Prisma should be pointed to a cloud database (e.g. Postgres or Turso).
+- **Network Dependency**: While mobile-optimized, it is a web application that relies on network access to communicate with the Next.js server actions.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## ⏱️ 60-Second Evaluator Demo Script
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Follow these steps to test the entire flow end-to-end:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **Sign In (0:00 - 0:10)**:
+   - Visit `http://localhost:3005`. You are redirected to `/login`.
+   - Toggle language to **हिंदी** or **অসমীয়া** at the top right.
+   - Click the amber button **"Use Default (kirana123)"** and tap **"Open Khata"**.
+2. **Dashboard Overview (0:10 - 0:25)**:
+   - Observe the **"Demo Data Loaded"** top banner.
+   - Notice the **Total Udhaar (Outstanding)** card (`₹6,120`), **Customers with Dues** (`4`), and **Top Customers by Balance Owed**.
+3. **Customer Search & Add (0:25 - 0:35)**:
+   - Tap **"Customers"** on the bottom nav.
+   - Type `"Sunita"` or `"9876"` in the search bar to filter instantly.
+   - Clear search and tap **"+ Add Customer"**. Enter Name: `Manoj Sharma`, Phone: `9822334455`. Tap **Save**.
+4. **Record Credit & Payment (0:35 - 0:50)**:
+   - Open `Manoj Sharma`'s profile.
+   - Tap 🔴 **"Udhaar Diya"**, enter `₹450`, note: `Mustard Oil & Biscuits`. Tap **Save to Khata**.
+   - Notice balance increases to `₹450`.
+   - Tap 🟢 **"Jama Kiya"**, enter `₹500` (exceeds balance).
+   - Notice the **Excess Payment Warning** confirmation modal appears! Tap **"Yes, Record Advance"**.
+   - Balance updates to `-₹50` (Advance).
+5. **Append-Only Reversal & WhatsApp Reminder (0:50 - 1:00)**:
+   - On any earlier transaction in the history, tap **"Reversal Entry"** and confirm. An offsetting entry is appended, never deleting past rows.
+   - Go to `Sunita Sharma` (balance `₹1,450`), tap **"Remind on WhatsApp"**. Verify it generates `https://wa.me/919876543210?text=...` with the polite reminder message.
