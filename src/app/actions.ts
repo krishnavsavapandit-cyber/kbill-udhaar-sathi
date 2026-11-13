@@ -13,6 +13,7 @@ import {
 } from "@/lib/auth";
 import { customerSchema, ledgerEntrySchema } from "@/lib/validations";
 import { rupeesToPaise } from "@/lib/money";
+import { computeUdhaarScore, UdhaarScoreResult } from "@/lib/udhaarScore";
 
 export interface ActionResult<T = unknown> {
   success: boolean;
@@ -129,10 +130,63 @@ export async function getCustomer(customerId: string) {
     }
   }
 
+  // Calculate rule-based Udhaar score on the server
+  const scoreResult = computeUdhaarScore(customer.entries, shop.baseCreditLimitPaise);
+
   return {
     ...customer,
     balancePaise,
+    scoreResult,
+    baseCreditLimitPaise: shop.baseCreditLimitPaise,
   };
+}
+
+export async function getCustomerScore(customerId: string): Promise<ActionResult<UdhaarScoreResult>> {
+  try {
+    const shop = await requireShop();
+    const customer = await prisma.customer.findFirst({
+      where: { id: customerId, shopId: shop.id },
+      include: { entries: true },
+    });
+
+    if (!customer) {
+      return { success: false, error: "Customer not found" };
+    }
+
+    const scoreResult = computeUdhaarScore(customer.entries, shop.baseCreditLimitPaise);
+    return { success: true, data: scoreResult };
+  } catch (err: unknown) {
+    if (err instanceof UnauthorizedError) {
+      return { success: false, error: "UNAUTHORIZED" };
+    }
+    const message = err instanceof Error ? err.message : "Failed to compute customer score";
+    return { success: false, error: message };
+  }
+}
+
+export async function updateShopBaseLimit(baseLimitRupees: number): Promise<ActionResult> {
+  try {
+    const shop = await requireShop();
+    if (!baseLimitRupees || baseLimitRupees <= 0) {
+      return { success: false, error: "Base credit limit must be greater than zero" };
+    }
+
+    const baseCreditLimitPaise = rupeesToPaise(baseLimitRupees);
+    await prisma.shop.update({
+      where: { id: shop.id },
+      data: { baseCreditLimitPaise },
+    });
+
+    revalidatePath("/dashboard");
+    revalidatePath("/customers");
+    return { success: true };
+  } catch (err: unknown) {
+    if (err instanceof UnauthorizedError) {
+      return { success: false, error: "UNAUTHORIZED" };
+    }
+    const message = err instanceof Error ? err.message : "Failed to update shop base limit";
+    return { success: false, error: message };
+  }
 }
 
 export async function createCustomer(formData: FormData): Promise<ActionResult<{ customerId: string }>> {

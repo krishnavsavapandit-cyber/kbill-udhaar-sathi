@@ -18,6 +18,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { formatINR } from "@/lib/money";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { Navbar } from "@/components/Navbar";
+import { UdhaarScoreResult } from "@/lib/udhaarScore";
 import {
   addLedgerEntry,
   reverseLedgerEntry,
@@ -37,6 +38,8 @@ interface CustomerData {
   name: string;
   phone: string;
   balancePaise: number;
+  scoreResult?: UdhaarScoreResult;
+  baseCreditLimitPaise?: number;
   entries: LedgerEntryItem[];
 }
 
@@ -65,6 +68,14 @@ export function CustomerLedgerClient({
   const [confirmExcessModal, setConfirmExcessModal] = useState<{
     pendingAmount: number;
     pendingNote?: string;
+  } | null>(null);
+
+  // Suggested credit limit warning modal state
+  const [confirmLimitModal, setConfirmLimitModal] = useState<{
+    pendingAmount: number;
+    pendingNote?: string;
+    suggestedLimitPaise: number;
+    resultingDuePaise: number;
   } | null>(null);
 
   // Reversal confirmation state
@@ -104,7 +115,11 @@ export function CustomerLedgerClient({
     }
   };
 
-  const handleEntrySubmit = async (e: React.FormEvent, forceNegative: boolean = false) => {
+  const handleEntrySubmit = async (
+    e: React.FormEvent,
+    forceNegative: boolean = false,
+    forceLimitOverride: boolean = false
+  ) => {
     e.preventDefault();
     setFormError(null);
 
@@ -112,6 +127,23 @@ export function CustomerLedgerClient({
     if (isNaN(numAmount) || numAmount <= 0) {
       setFormError("Please enter a valid amount greater than zero");
       return;
+    }
+
+    // Check suggested credit limit warning (advisory only)
+    if (modalType === "CREDIT_GIVEN" && !forceLimitOverride) {
+      const suggestedLimitPaise = customer.scoreResult?.suggestedLimitPaise ?? 500000;
+      const amountPaise = Math.round(numAmount * 100);
+      const resultingDuePaise = Math.max(0, customer.balancePaise) + amountPaise;
+
+      if (resultingDuePaise > suggestedLimitPaise) {
+        setConfirmLimitModal({
+          pendingAmount: numAmount,
+          pendingNote: noteInput.trim(),
+          suggestedLimitPaise,
+          resultingDuePaise,
+        });
+        return;
+      }
     }
 
     startTransition(async () => {
@@ -132,9 +164,33 @@ export function CustomerLedgerClient({
       } else if (res.success) {
         handleCloseEntryModal();
         setConfirmExcessModal(null);
+        setConfirmLimitModal(null);
         router.refresh();
       } else {
         setFormError(res.error || "Failed to record transaction");
+      }
+    });
+  };
+
+  const handleConfirmLimitOverride = () => {
+    if (!confirmLimitModal) return;
+    const numAmount = confirmLimitModal.pendingAmount;
+    const note = confirmLimitModal.pendingNote;
+
+    startTransition(async () => {
+      const res = await addLedgerEntry({
+        customerId: customer.id,
+        type: "CREDIT_GIVEN",
+        amountRupees: numAmount,
+        note,
+      });
+
+      if (res.success) {
+        setConfirmLimitModal(null);
+        handleCloseEntryModal();
+        router.refresh();
+      } else {
+        setFormError(res.error || "Failed to record credit");
       }
     });
   };
@@ -292,6 +348,74 @@ export function CustomerLedgerClient({
             shopName={shopName}
             variant="full"
           />
+        )}
+
+        {/* UDHAAR SCORE CARD (RULE-BASED, DETERMINISTIC) */}
+        {customer.scoreResult && (
+          <div className="bg-white rounded-3xl p-4 shadow-sm border border-slate-200/80">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div
+                  className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-lg shadow-sm border ${
+                    customer.scoreResult.band === "Good"
+                      ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                      : customer.scoreResult.band === "Watch"
+                      ? "bg-amber-50 text-amber-800 border-amber-200"
+                      : "bg-rose-50 text-rose-800 border-rose-200"
+                  }`}
+                >
+                  {customer.scoreResult.score}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-black text-slate-900 tracking-tight">
+                      Udhaar Score
+                    </h3>
+                    <span
+                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                        customer.scoreResult.band === "Good"
+                          ? "bg-emerald-600 text-white"
+                          : customer.scoreResult.band === "Watch"
+                          ? "bg-amber-500 text-white"
+                          : "bg-rose-600 text-white"
+                      }`}
+                    >
+                      {customer.scoreResult.band}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Suggested Limit:{" "}
+                    <strong className="text-slate-900 font-bold">
+                      {formatINR(customer.scoreResult.suggestedLimitPaise)}
+                    </strong>{" "}
+                    <span className="text-[10px] text-slate-400 font-normal">
+                      (Advisory)
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Reasons List */}
+            {customer.scoreResult.reasons.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-slate-100 space-y-1.5">
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  Payment History & Factors
+                </div>
+                <div className="space-y-1">
+                  {customer.scoreResult.reasons.map((reason, idx) => (
+                    <div
+                      key={idx}
+                      className="text-xs text-slate-600 flex items-start gap-1.5 font-medium"
+                    >
+                      <span className="text-slate-400 mt-0.5">•</span>
+                      <span>{reason}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         )}
 
         {/* Transaction History Header */}
@@ -624,6 +748,47 @@ export function CustomerLedgerClient({
                 className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors"
               >
                 {t.cancelPayment}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CONFIRM DIALOG: SUGGESTED CREDIT LIMIT OVERRIDE (ADVISORY, NON-BLOCKING) */}
+      {confirmLimitModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-slate-100 text-center">
+            <div className="w-14 h-14 bg-amber-100 text-amber-700 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-inner">
+              <AlertTriangle className="w-8 h-8" />
+            </div>
+
+            <h3 className="text-lg font-black text-slate-900">
+              Suggested Limit Warning
+            </h3>
+
+            <p className="text-xs text-slate-600 mt-2 font-medium leading-relaxed">
+              This credit of <strong>₹{confirmLimitModal.pendingAmount.toFixed(2)}</strong> will bring total due to <strong>{formatINR(confirmLimitModal.resultingDuePaise)}</strong>, exceeding the suggested limit of <strong>{formatINR(confirmLimitModal.suggestedLimitPaise)}</strong> ({customer.scoreResult?.band ?? "Advisory"}).
+            </p>
+
+            <p className="text-[11px] text-slate-400 mt-2 bg-slate-50 p-2.5 rounded-xl">
+              ℹ️ Suggested credit limits are advisory only. You can override and record this credit.
+            </p>
+
+            <div className="flex flex-col gap-2 pt-4">
+              <button
+                type="button"
+                onClick={handleConfirmLimitOverride}
+                disabled={isPending}
+                className="w-full py-3.5 rounded-xl bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white font-extrabold text-sm shadow-md shadow-amber-600/30 transition-all active:scale-95"
+              >
+                {isPending ? "Recording..." : "Confirm & Give Credit"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmLimitModal(null)}
+                className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors"
+              >
+                Cancel
               </button>
             </div>
           </div>

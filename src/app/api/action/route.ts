@@ -8,6 +8,8 @@ import {
   updateCustomer,
   addLedgerEntry,
   reverseLedgerEntry,
+  getCustomerScore,
+  updateShopBaseLimit,
 } from "@/app/actions";
 
 export async function POST(req: NextRequest) {
@@ -66,6 +68,16 @@ export async function POST(req: NextRequest) {
 
       case "reverseLedgerEntry": {
         const res = await reverseLedgerEntry(payload?.entryId);
+        return NextResponse.json(res, { status: res.success ? 200 : 400 });
+      }
+
+      case "getCustomerScore": {
+        const res = await getCustomerScore(payload?.customerId);
+        return NextResponse.json(res, { status: res.success ? 200 : 400 });
+      }
+
+      case "updateShopBaseLimit": {
+        const res = await updateShopBaseLimit(payload?.baseLimitRupees);
         return NextResponse.json(res, { status: res.success ? 200 : 400 });
       }
 
