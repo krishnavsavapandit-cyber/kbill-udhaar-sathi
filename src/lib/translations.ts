@@ -226,6 +226,12 @@ export interface Translations {
   landingBottomCtaTitle: string;
   landingBottomCtaDesc: string;
   landingBottomCtaButton: string;
+
+  // Built with Tests Block
+  builtWithTestsTitle: string;
+  builtWithTestsDesc: string;
+  builtWithTestsRepoLink: string;
+  builtWithTestsDocsLink: string;
 }
 
 export const translations: Record<Language, Translations> = {
@@ -449,6 +455,11 @@ export const translations: Record<Language, Translations> = {
     landingBottomCtaTitle: "Ready to Make Your Shop 100% Organized & Profitable?",
     landingBottomCtaDesc: "Takes less than 1 minute to start. Open your digital khata now!",
     landingBottomCtaButton: "Open My Shop Khata Now",
+
+    builtWithTestsTitle: "Built with Automated Testing",
+    builtWithTestsDesc: "Keploy runs in GitHub Actions on every push to verify our HTTP endpoints and prevent regressions before code merges.",
+    builtWithTestsRepoLink: "GitHub Repository",
+    builtWithTestsDocsLink: "Keploy Testing Guide",
   },
 
   hi: {
@@ -671,6 +682,11 @@ export const translations: Record<Language, Translations> = {
     landingBottomCtaTitle: "क्या आप अपनी दुकान को 100% व्यवस्थित और मुनाफ़ेदार बनाने के लिए तैयार हैं?",
     landingBottomCtaDesc: "शुरू करने में 1 मिनट से भी कम समय लगता है। अभी अपनी दुकान का खाता खोलें!",
     landingBottomCtaButton: "अपनी दुकान का खाता खोलें",
+
+    builtWithTestsTitle: "स्वचालित टेस्टिंग के साथ निर्मित",
+    builtWithTestsDesc: "हर कोड पुश पर GitHub Actions में Keploy के साथ API रीग्रेशन की जांच होती है, जिससे मुख्य खाता और सुरक्षा सुरक्षित रहते हैं।",
+    builtWithTestsRepoLink: "गिटहब रिपॉजिटरी",
+    builtWithTestsDocsLink: "Keploy टेस्टिंग गाइड",
   },
 
   as: {
@@ -893,5 +909,10 @@ export const translations: Record<Language, Translations> = {
     landingBottomCtaTitle: "আপোনাৰ দোকানখন ১০০% সুশৃংখল আৰু লাভজনক কৰিবলৈ সাজুনে?",
     landingBottomCtaDesc: "আৰম্ভ কৰিবলৈ ১ মিনিটতকৈও কম সময় লাগে। এতিয়াই ডিজিটেল খাতা খোলক!",
     landingBottomCtaButton: "মোৰ দোকানৰ খাতা খোলক",
+
+    builtWithTestsTitle: "স্বয়ংক্রিয় পৰীক্ষণেৰে নিৰ্মিত",
+    builtWithTestsDesc: "প্ৰতিটো ক'ড পুশত GitHub Actions-ত Keploy-ৰ দ্বাৰা API ৰিগ্ৰেছন পৰীক্ষা কৰা হয়, যাৰ দ্বাৰা মূল খাতা আৰু সুৰক্ষা অক্ষুণ্ণ থাকে।",
+    builtWithTestsRepoLink: "গিটহাব ৰিপজিটৰি",
+    builtWithTestsDocsLink: "Keploy পৰীক্ষণ নিৰ্দেশিকা",
   },
 };

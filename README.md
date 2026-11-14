@@ -1,6 +1,8 @@
 # 📖 Udhaar Saathi (उधार साथी / ধাৰ সাৰথী)
 > **Digital Khata & Profit Assistant for Local Kirana & Retail Shopkeepers in India**
 
+[![Keploy API Regression Tests](https://github.com/krishnavsavapandit-cyber/kbill-udhaar-sathi/actions/workflows/keploy.yml/badge.svg)](https://github.com/krishnavsavapandit-cyber/kbill-udhaar-sathi/actions/workflows/keploy.yml)
+
 Udhaar Saathi replaces the vulnerable paper credit notebook (*bahi-khata*) of Indian small shopkeepers with a focused, responsive web application that runs smoothly across mobile phones, tablets, and desktop computers.
 
 ---
@@ -218,16 +220,52 @@ The test suite executes 97 automated tests covering unit logic, atomic concurren
 npm test
 ```
 
-### 5. Automated E2E Regression with Keploy
-This project includes pre-recorded test cases and configuration for **[Keploy](https://keploy.io/)**, capturing HTTP calls and replaying tests without touching core application code:
+### 5. Testing with Keploy
+
+[![Keploy API Regression Tests](https://github.com/krishnavsavapandit-cyber/kbill-udhaar-sathi/actions/workflows/keploy.yml/badge.svg)](https://github.com/krishnavsavapandit-cyber/kbill-udhaar-sathi/actions/workflows/keploy.yml)
+
+Keploy is integrated for automated API regression testing at the HTTP boundary, verifying that incoming network requests receive expected responses without touching or modifying any application code.
+
+#### What the Test Cases Cover
+The versioned test suite in [`keploy/test-set-0/tests/`](./keploy/test-set-0/tests/) validates:
+- **`test-1-landing-page.yaml`**: `GET /` — Verifies that the public landing page loads with HTTP 200 OK and valid HTML content.
+- **`test-2-login-page.yaml`**: `GET /login` — Verifies that the shopkeeper authentication screen loads with HTTP 200 OK.
+- **`test-3-unauthorized-action-rejected.yaml`**: `POST /api/action` — Verifies that unauthenticated requests to internal server actions without a valid HMAC session cookie are rejected with HTTP 401 Unauthorized (`{"success":false,"error":"UNAUTHORIZED"}`).
+- **`test-4-pwa-manifest.yaml`**: `GET /manifest.json` — Verifies that the Progressive Web App manifest is publicly accessible and returns HTTP 200 OK with valid JSON metadata.
+
+#### Automated GitHub Actions CI
+Every push and pull request to the `main` branch triggers the [Keploy CI Workflow](.github/workflows/keploy.yml) on `ubuntu-latest`. The workflow:
+1. Checks out the repository and sets up Node.js.
+2. Builds the Next.js application and initializes the SQLite database with seed data.
+3. Installs the Keploy Linux CLI.
+4. Executes `keploy test -c "npm run start" --delay 10`, booting the Next.js production server and running the test suite.
+
+You can inspect the live status in the [GitHub Actions tab](https://github.com/krishnavsavapandit-cyber/kbill-udhaar-sathi/actions/workflows/keploy.yml).
+
+#### Running Keploy Locally (WSL2 or Docker)
+Keploy relies on Linux eBPF network hooks. On Windows machines, run Keploy inside **WSL2 (Ubuntu)** or via **Docker**:
+
 ```bash
-# Replay Keploy tests against the running server:
+# Inside WSL2 or a Linux Docker container with Keploy installed:
+
+# Replay Keploy tests against the running application:
 npm run keploy:test
 
-# Record new user flows and API calls:
+# Record new user sessions and API calls:
 npm run keploy:record
 ```
-See the full guide in [KEPLOY.md](./KEPLOY.md) and the CI workflow in [`.github/workflows/keploy.yml`](./.github/workflows/keploy.yml).
+For detailed configuration options and port settings, see [KEPLOY.md](./KEPLOY.md).
+
+#### Honest Limits & Technical Boundaries
+We document our testing posture transparently:
+- **Hand-written vs Recorded**: All 4 baseline test cases in `keploy/test-set-0/tests/` were hand-authored using the Keploy v2 YAML specification rather than captured via dynamic live network proxy recording on the Windows development host.
+- **SQLite is Not Mocked**: Keploy tests currently run against the live SQLite instance created during `npm run build`. Keploy does not intercept or mock SQLite database calls.
+- **Writes Not Covered**: Mutating write operations (such as creating credit transactions, recording payments, adding customers, or updating stock) are not currently included in the Keploy regression suite. Write logic and race conditions are covered by our 97 Node integration tests (`npm test`).
+- **CI Only, Not on Render**: Keploy tests run exclusively inside the GitHub Actions CI environment. They do not run in production or on Render.
+
+#### CI Run Screenshot
+![Keploy Passing Run](docs/keploy-run.png)
+*(Placeholder: add screenshot of a passing run at `docs/keploy-run.png`)*
 
 ---
 

@@ -849,6 +849,55 @@ export function LandingPageClient({
         </div>
       </section>
 
+      {/* 7. BUILT WITH TESTS (KEPLOY CI TRANSPARENCY) */}
+      <section className="pb-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+        <div className="bg-amber-50/80 border border-amber-200/90 rounded-2xl p-5 sm:p-6 text-slate-800 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="space-y-1.5 max-w-2xl">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <span className="text-xs font-black uppercase tracking-wider text-amber-900 bg-amber-200/80 px-2 py-0.5 rounded-md">
+                {t.builtWithTestsTitle}
+              </span>
+              <a
+                href="https://github.com/krishnavsavapandit-cyber/kbill-udhaar-sathi/actions/workflows/keploy.yml"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center hover:opacity-85 transition-opacity"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="https://github.com/krishnavsavapandit-cyber/kbill-udhaar-sathi/actions/workflows/keploy.yml/badge.svg"
+                  alt="Keploy CI Tests Status"
+                  className="h-5"
+                />
+              </a>
+            </div>
+            <p className="text-xs sm:text-sm text-slate-700 font-medium leading-relaxed">
+              {t.builtWithTestsDesc}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3 text-xs font-bold shrink-0 pt-1 sm:pt-0">
+            <a
+              href="https://github.com/krishnavsavapandit-cyber/kbill-udhaar-sathi"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-emerald-800 hover:text-emerald-950 underline underline-offset-2 flex items-center gap-1"
+            >
+              <span>{t.builtWithTestsRepoLink}</span>
+            </a>
+            <span className="text-slate-300">•</span>
+            <a
+              href="https://github.com/krishnavsavapandit-cyber/kbill-udhaar-sathi/blob/main/KEPLOY.md"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-emerald-800 hover:text-emerald-950 underline underline-offset-2 flex items-center gap-1"
+            >
+              <span>{t.builtWithTestsDocsLink}</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* 7. HONEST FOOTER */}
       <footer className="mt-auto bg-slate-900 text-slate-400 py-8 px-4 sm:px-6 lg:px-8 border-t-2 border-slate-800">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
