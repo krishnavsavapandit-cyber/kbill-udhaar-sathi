@@ -6,9 +6,8 @@
 .pnp.js
 .yarn/install-state.gz
 
-# testing & keploy recordings with real data
+# testing & internal keploy cache
 /coverage
-keploy/
 .keploy/
 *.keploy
 

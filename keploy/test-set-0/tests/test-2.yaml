@@ -1,0 +1,33 @@
+version: api.keploy.io/v1beta1
+kind: Http
+name: test-2-login-page
+spec:
+  metadata:
+    description: "Verify login page loads with shopkeeper authentication form"
+  req:
+    method: GET
+    proto_major: 1
+    proto_minor: 1
+    url: /login
+    header:
+      Accept: text/html
+      Host: localhost:3005
+      User-Agent: Keploy
+    body: ""
+    timestamp: 2026-11-14T02:27:05Z
+  resp:
+    status_code: 200
+    header:
+      Content-Type: text/html; charset=utf-8
+    body: ""
+    status_message: OK
+    proto_major: 1
+    proto_minor: 1
+    timestamp: 2026-11-14T02:27:06Z
+  objects: []
+  assertions:
+    noise:
+      header.Date: []
+      header.ETag: []
+      header.Vary: []
+  created: 1731551226

@@ -1,0 +1,30 @@
+# =============================================================================
+# Keploy v2 Configuration for Udhaar Saathi
+# Documentation: https://keploy.io/docs/
+# =============================================================================
+
+test:
+  path: "./keploy"
+  command: "npm run start"
+  port: 3005
+  delay: 10
+  timeout: 60
+  ignoreOrdering: true
+  passThrough: []
+  globalNoise:
+    header:
+      Date: []
+      Set-Cookie: []
+      ETag: []
+      x-powered-by: []
+      vary: []
+      keep-alive: []
+
+record:
+  path: "./keploy"
+  command: "npm run start"
+  port: 3005
+  filters:
+    - path: "/_next/*"
+    - path: "/favicon.ico"
+    - path: "/icon.svg"

@@ -1,0 +1,31 @@
+version: api.keploy.io/v1beta1
+kind: Http
+name: test-3-unauthorized-action-rejected
+spec:
+  metadata:
+    description: "Verify unauthenticated action request to /api/action is rejected with HTTP 401"
+  req:
+    method: POST
+    proto_major: 1
+    proto_minor: 1
+    url: /api/action
+    header:
+      Content-Type: application/json
+      Host: localhost:3005
+      User-Agent: Keploy
+    body: '{"action":"getDashboardData"}'
+    timestamp: 2026-11-14T02:27:10Z
+  resp:
+    status_code: 401
+    header:
+      Content-Type: application/json
+    body: '{"success":false,"error":"UNAUTHORIZED"}'
+    status_message: Unauthorized
+    proto_major: 1
+    proto_minor: 1
+    timestamp: 2026-11-14T02:27:11Z
+  objects: []
+  assertions:
+    noise:
+      header.Date: []
+  created: 1731551231

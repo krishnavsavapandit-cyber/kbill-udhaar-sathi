@@ -218,6 +218,17 @@ The test suite executes 97 automated tests covering unit logic, atomic concurren
 npm test
 ```
 
+### 5. Automated E2E Regression with Keploy
+This project includes pre-recorded test cases and configuration for **[Keploy](https://keploy.io/)**, capturing HTTP calls and replaying tests without touching core application code:
+```bash
+# Replay Keploy tests against the running server:
+npm run keploy:test
+
+# Record new user flows and API calls:
+npm run keploy:record
+```
+See the full guide in [KEPLOY.md](./KEPLOY.md) and the CI workflow in [`.github/workflows/keploy.yml`](./.github/workflows/keploy.yml).
+
 ---
 
 ## ⏱️ Walkthrough Demo Script

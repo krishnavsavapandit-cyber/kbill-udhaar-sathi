@@ -1,0 +1,42 @@
+name: Keploy API Regression Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Setup Environment
+        run: |
+          cp .env.example .env
+          sed -i 's/your_secure_password_here/kirana123/g' .env
+          sed -i 's/your_random_hmac_secret_key_minimum_32_characters_long/udhaar-saathi-session-secret-key-32-chars-min/g' .env
+
+      - name: Build Application & Initialize Database
+        run: npm run build
+
+      - name: Install Keploy CLI
+        run: |
+          curl -O -L https://keploy.io/install.sh
+          bash install.sh
+
+      - name: Run Keploy Tests
+        run: |
+          keploy test -c "npm run start" --delay 10

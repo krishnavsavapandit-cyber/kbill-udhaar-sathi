@@ -1,0 +1,33 @@
+version: api.keploy.io/v1beta1
+kind: Http
+name: test-4-pwa-manifest
+spec:
+  metadata:
+    description: "Verify PWA manifest is served with 200 OK"
+  req:
+    method: GET
+    proto_major: 1
+    proto_minor: 1
+    url: /manifest.json
+    header:
+      Accept: application/json
+      Host: localhost:3005
+      User-Agent: Keploy
+    body: ""
+    timestamp: 2026-11-14T02:27:15Z
+  resp:
+    status_code: 200
+    header:
+      Content-Type: application/json
+    body: '{"name":"Udhaar Saathi - Digital Khata","short_name":"UdhaarSaathi","description":"Digital Khata & Daily Profit Assistant for Local Kirana Shopkeepers","start_url":"/","display":"standalone","background_color":"#FAF7F0","theme_color":"#065F46","icons":[{"src":"/icon.svg","sizes":"192x192 512x512","type":"image/svg+xml"}]}'
+    status_message: OK
+    proto_major: 1
+    proto_minor: 1
+    timestamp: 2026-11-14T02:27:16Z
+  objects: []
+  assertions:
+    noise:
+      header.Date: []
+      header.ETag: []
+      header.Last-Modified: []
+  created: 1731551236

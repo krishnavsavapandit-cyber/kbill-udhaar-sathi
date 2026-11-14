@@ -9,7 +9,9 @@
     "lint": "next lint",
     "postinstall": "prisma generate",
     "seed:demo": "tsx prisma/seed.ts",
-    "test": "tsx scripts/test-app.ts"
+    "test": "tsx scripts/test-app.ts",
+    "keploy:record": "keploy record -c \"npm run start\"",
+    "keploy:test": "keploy test -c \"npm run start\""
   },
   "dependencies": {
     "@prisma/client": "5.22.0",
